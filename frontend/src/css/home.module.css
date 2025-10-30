@@ -1,0 +1,40 @@
+.home {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #6f1ca0 0%, #e2750fa1 100%);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mainContent {
+  padding-top: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.container {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 2rem;
+  text-align: center;
+}
+
+.welcomeMessage, .loginPrompt {
+  background: rgb(255, 255, 255);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.welcomeMessage h2 {
+  color: #38a169;
+  margin-bottom: 1rem;
+}
+
+.loginPrompt h2 {
+  color: #667eea;
+  margin-bottom: 1rem;
+}
