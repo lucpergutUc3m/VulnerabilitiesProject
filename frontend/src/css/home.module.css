@@ -1,12 +1,10 @@
 .home {
   min-height: 100vh;
-  background: linear-gradient(135deg, #6f1ca0 0%, #e2750fa1 100%);
   width: 100%;
   box-sizing: border-box;
 }
 
 .mainContent {
-  padding-top: 2rem;
   width: 100%;
   box-sizing: border-box;
 }
@@ -14,11 +12,76 @@
 .container {
   width: 100%;
   box-sizing: border-box;
-  padding: 2rem;
+  padding-top: 2rem;
   text-align: center;
 }
 
-.welcomeMessage, .loginPrompt {
+.mainContent {
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+  box-sizing: border-box;
+}
+
+.containerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 95%;
+  box-sizing: border-box;
+  margin: 0 auto;
+  height: 60px; 
+}
+
+.containerHeaderTitle {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  padding-left: 10px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.addButton {
+  padding: 0.7rem 1.2rem;
+  background: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(111, 28, 160, 0.3);
+  display: flex;
+  align-items: center;
+  height: fit-content;
+  margin: 0;
+}
+
+.gradientText {
+  background-image: linear-gradient(90deg, #6f1ca0, #e2750f);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  display: inline-block;
+}
+
+.addButton:hover {
+  box-shadow: 0 4px 12px rgba(111, 28, 160, 0.4);
+  transform: translateY(-1px);
+}
+
+.addButton:active {
+  transform: translateY(0);
+}
+
+.welcomeMessage,
+.loginPrompt {
   background: rgb(255, 255, 255);
   padding: 2rem;
   border-radius: 12px;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from '../css/toolbar.module.css';
 import logoImg from '../assets/images/logo.svg';
-// User icon (you can replace with an SVG or image)
+
 const UserIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />

@@ -12,7 +12,6 @@ const Home: React.FC = () => {
   } | null>(null);
 
   useEffect(() => {
-    // Load user from localStorage when component mounts
     const storedUserData = localStorage.getItem('user');
     if (storedUserData) {
       try {
@@ -24,19 +23,15 @@ const Home: React.FC = () => {
   }, []);
 
   const handleNavigateToLogin = () => {
-    // Navigate to login screen
     navigate('/login');
   };
 
   const handleUserLogout = () => {
-    // Clear user data from localStorage
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
-    
-    // Clear user state
+
     setCurrentUser(null);
-    
-    // Navigate to home
+
     navigate('/');
   };
   const mockTests = [
@@ -102,20 +97,30 @@ const Home: React.FC = () => {
   };
   return (
     <div className={styles.home}>
-      <Toolbar 
+      <Toolbar
         appName="Cuestioneo "
         onLoginClick={handleNavigateToLogin}
         onLogout={handleUserLogout}
         user={currentUser}
       />
-      
+
       <main className={styles.mainContent}>
         <div className={styles.container}>
           {currentUser ? (
-            <div>
-      <h1>Mis Tests Creados</h1>
-      <TestCardList tests={mockTests} onEmojiChange={handleEmojiChange} />
-    </div>
+            <div className={styles.mainContent}>
+              <div className={styles.containerHeader}>
+                <h1 className={styles.containerHeaderTitle}>Tus Test Añadidos</h1>
+                <button className={styles.addButton}>
+                  <span className={styles.gradientText}>Añadir pregunta</span>
+                </button>
+              </div>
+
+              <div className={styles.container} >
+                <TestCardList tests={mockTests} onEmojiChange={handleEmojiChange} />
+              </div>
+
+
+            </div>
           ) : (
             <div className={styles.loginPrompt}>
               <h2>Sign in to access all features</h2>

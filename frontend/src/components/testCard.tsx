@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import styles from '../css/tests.card.module.css';
+import { FaEye, FaPlay } from 'react-icons/fa';
 
 interface Test {
     id: number;
@@ -53,21 +54,21 @@ const TestCard = ({
     };
 
 
-const getPickerStyle = () => {
-    if (!isOpen || !selectorRef.current) {
-        return {};
-    }
-    
-    const rect = selectorRef.current.getBoundingClientRect();
+    const getPickerStyle = () => {
+        if (!isOpen || !selectorRef.current) {
+            return {};
+        }
 
-    const horizontalOffset = 63;
-    
-    return {
-        top: `${rect.bottom + window.scrollY + 8}px`,
-        left: `${rect.left + rect.width / 2 + window.scrollX + horizontalOffset}px`,
-        transform: 'translateX(-50%)'
+        const rect = selectorRef.current.getBoundingClientRect();
+
+        const horizontalOffset = 63;
+
+        return {
+            top: `${rect.bottom + window.scrollY + 8}px`,
+            left: `${rect.left + rect.width / 2 + window.scrollX + horizontalOffset}px`,
+            transform: 'translateX(-50%)'
+        };
     };
-};
 
     return (
         <>
@@ -108,15 +109,23 @@ const getPickerStyle = () => {
                                 {new Date(test.createdAt).toLocaleDateString()}
                             </span>
                         </div>
-                        <button className={styles['view-button']}>Ver</button>
+                        <button className={styles['view-button']}>
+                            <FaEye className={styles['button-icon']} />
+                            Watch
+                        </button>
+
+                        <button className={styles['play-button']}>
+                            <FaPlay className={styles['button-icon']} />
+                            Play
+                        </button>
                     </div>
                 </div>
             </div>
 
-            {/* Picker en posición fija, completamente fuera del flujo */}
+
             {isOpen &&
                 createPortal(
-                    <div 
+                    <div
                         ref={pickerRef}
                         className={styles['emoji-picker-fixed']}
                         style={getPickerStyle()}

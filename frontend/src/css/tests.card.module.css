@@ -4,11 +4,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 16px 16px;
+  gap: 10px;
+  padding: -2px 16px;
   margin: 0 auto;
-  width: 100%;
-  max-width: 1200px;
   box-sizing: border-box;
 }
 
@@ -16,10 +14,9 @@
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(111, 28, 160, 0.08);
-  border: 1px solid #f0e6ff;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  overflow: visible;
+  overflow: hidden; 
   width: 95%;
   display: grid;
   grid-template-columns: 120px 1fr;
@@ -35,9 +32,13 @@
   background: linear-gradient(90deg, #6f1ca0 0%, #e2750f 100%);
   transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1;
-  border-radius: 16px 16px 0 0;
+  border-radius: 16px 16px 0 0; 
+  width: 100%; 
+  box-sizing: border-box; 
 }
-
+.test-card:hover::before {
+  height: 4px;
+}
 .test-card:hover::before {
   height: 4px;
 }
@@ -83,6 +84,7 @@
 /* EMOJI PICKER FIXED - Usando posición fija relativa a la ventana */
 .emoji-picker-fixed {
   position: fixed;
+
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 16px;
@@ -97,6 +99,53 @@
   pointer-events: auto;
 }
 
+.view-button {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espacio entre icono y texto */
+    padding: 10px 16px;
+    background: linear-gradient(45deg,  #e2750f 0%, #6f1ca0 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(111, 28, 160, 0.25);
+    white-space: nowrap;
+}
+.play-button {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espacio entre icono y texto */
+    padding: 10px 16px;
+    background: linear-gradient(135deg,  #e2750f 0%, #6f1ca0 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(111, 28, 160, 0.25);
+    white-space: nowrap;
+}
+.button-icon {
+    font-size: 0.9em; /* Para React Icons */
+    /* O para SVG: */
+    width: 16px;
+    height: 16px;
+}
+
+.view-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(111, 28, 160, 0.35);
+}
+
+.view-button:active {
+    transform: translateY(0);
+}
 
 
 @keyframes slideDown {
