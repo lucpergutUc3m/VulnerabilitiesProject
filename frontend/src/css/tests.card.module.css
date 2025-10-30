@@ -19,7 +19,7 @@
   border: 1px solid #f0e6ff;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   width: 95%;
   display: grid;
   grid-template-columns: 120px 1fr;
@@ -50,6 +50,7 @@
   padding: 20px 14px;
   position: relative;
   z-index: 2;
+  pointer-events: auto;
 }
 
 .emoji-selector {
@@ -63,7 +64,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  z-index: 1;
+  pointer-events: auto;
 }
 
 .emoji-selector:hover {
@@ -78,30 +80,31 @@
   display: block;
 }
 
-/* EMOJI PICKER FIXED - Usando posición absoluta relativa al card */
-.emoji-picker {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
+/* EMOJI PICKER FIXED - Usando posición fija relativa a la ventana */
+.emoji-picker-fixed {
+  position: fixed;
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 16px;
-  padding: 16px;
+  padding: 12px;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  z-index: 1000;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  z-index: 9999;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
   animation: slideDown 0.2s ease-out;
-  min-width: 200px;
+  min-width: auto;
+  pointer-events: auto;
 }
+
+
 
 @keyframes slideDown {
   from {
     opacity: 0;
     transform: translateX(-50%) translateY(-8px);
   }
+
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
@@ -118,6 +121,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: 10000;
+  pointer-events: auto;
 }
 
 .emoji-option:hover {
@@ -137,12 +143,14 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  
+
   gap: 5px;
-}.test-title-topic {
+}
+
+.test-title-topic {
   display: flex;
   flex-direction: row;
-  padding-top:0.5rem;
+  padding-top: 0.5rem;
   gap: 4px;
   align-items: center;
   justify-content: space-between;
@@ -150,7 +158,8 @@
 
 .test-topic-wrapper {
   display: inline-block;
-  padding: 2px; /* grosor del borde */
+  padding: 2px;
+  /* grosor del borde */
   background: linear-gradient(90deg, #6f1ca0 0%, #e2750f 100%);
   border-radius: 20px;
 }
@@ -158,8 +167,10 @@
 .test-topic {
   display: inline-block;
   padding: 5px 12px;
-  background: white; /* o fondo del fondo */
-  border-radius: 19px; /* wrapper padding = 1px, así que 20 - 1 = 19 */
+  background: white;
+  /* o fondo del fondo */
+  border-radius: 19px;
+  /* wrapper padding = 1px, así que 20 - 1 = 19 */
   font-size: 0.9rem;
   font-weight: 700;
   color: #6f1ca0;
@@ -190,7 +201,8 @@
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 1.8em; /* Altura mínima para 1 línea */
+  min-height: 1.8em;
+  /* Altura mínima para 1 línea */
 }
 
 /* META INFORMATION - ESTRUCTURA SIMPLIFICADA */
@@ -256,12 +268,12 @@
     padding: 24px 16px;
     gap: 16px;
   }
-  
+
   .test-card {
     grid-template-columns: 80px 1fr;
     min-height: 140px;
   }
-  
+
   .test-card-header {
     padding: 20px 12px;
   }
@@ -311,7 +323,7 @@
     grid-template-columns: 70px 1fr;
     min-height: 140px;
   }
-  
+
   .test-card-header {
     padding: 16px 8px;
   }
@@ -345,11 +357,12 @@
     grid-template-columns: repeat(4, 1fr);
     min-width: 180px;
     padding: 12px;
+    
   }
 }
 
 /* FIXES ESPECÍFICOS PARA SUPERPOSICIÓN */
-.test-card > * {
+.test-card>* {
   position: relative;
   z-index: 2;
 }
@@ -358,6 +371,7 @@
   position: relative;
   display: flex;
   justify-content: center;
+  z-index: 100;
 }
 
 /* Asegurar que el contenido no se superponga */
@@ -366,7 +380,8 @@
   z-index: 1;
 }
 
-.test-main-content, .test-meta {
+.test-main-content,
+.test-meta {
   position: relative;
   z-index: 2;
 }
