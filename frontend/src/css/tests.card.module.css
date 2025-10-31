@@ -1,0 +1,437 @@
+/* tests.card.module.css - Fixed Design */
+
+.test-cards-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: -2px 16px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.test-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(111, 28, 160, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0px 0px 12px 0px;
+  position: relative;
+  overflow: hidden; 
+  width: 95%;
+  display: grid;
+  grid-template-columns: 120px 1fr;
+}
+
+.test-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  background: linear-gradient(90deg, #6f1ca0 0%, #e2750f 100%);
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+  border-radius: 16px 16px 0 0; 
+  width: 100%; 
+  box-sizing: border-box; 
+}
+.test-card:hover::before {
+  height: 4px;
+}
+.test-card:hover::before {
+  height: 4px;
+}
+
+.test-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 14px;
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.emoji-selector {
+  position: relative;
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 14px;
+  transition: all 0.3s ease;
+  width: 68px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.emoji-selector:hover {
+  border-color: #6f1ca0;
+  box-shadow: 0 6px 20px rgba(111, 28, 160, 0.2);
+  transform: scale(1.05);
+}
+
+.emoji-display {
+  font-size: 2.4em;
+  line-height: 1;
+  display: block;
+}
+
+/* EMOJI PICKER FIXED - Usando posición fija relativa a la ventana */
+.emoji-picker-fixed {
+  position: fixed;
+
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  z-index: 9999;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  animation: slideDown 0.2s ease-out;
+  min-width: auto;
+  pointer-events: auto;
+}
+
+.view-button {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espacio entre icono y texto */
+    padding: 10px 16px;
+    background: linear-gradient(45deg,  #e2750f 0%, #6f1ca0 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(111, 28, 160, 0.25);
+    white-space: nowrap;
+}
+.play-button {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espacio entre icono y texto */
+    padding: 10px 16px;
+    background: linear-gradient(135deg,  #e2750f 0%, #6f1ca0 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(111, 28, 160, 0.25);
+    white-space: nowrap;
+}
+.button-icon {
+    font-size: 0.9em; /* Para React Icons */
+    /* O para SVG: */
+    width: 16px;
+    height: 16px;
+}
+
+.view-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(111, 28, 160, 0.35);
+}
+
+.view-button:active {
+    transform: translateY(0);
+}
+
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.emoji-option {
+  font-size: 1.5em;
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 10000;
+  pointer-events: auto;
+}
+
+.emoji-option:hover {
+  background: #f3e8ff;
+  transform: scale(1.1);
+}
+
+/* CONTENT AREA - ESTRUCTURA CORREGIDA */
+.test-content-area {
+  display: flex;
+  flex-direction: column;
+  min-height: 80px;
+}
+
+.test-main-content {
+  padding: 12px 14px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.test-title-topic {
+  display: flex;
+  flex-direction: row;
+  padding-top: 0.5rem;
+  gap: 4px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.test-topic-wrapper {
+  display: inline-block;
+  padding: 2px;
+  /* grosor del borde */
+  background: linear-gradient(90deg, #6f1ca0 0%, #e2750f 100%);
+  border-radius: 20px;
+}
+
+.test-topic {
+  display: inline-block;
+  padding: 5px 12px;
+  background: white;
+  /* o fondo del fondo */
+  border-radius: 19px;
+  /* wrapper padding = 1px, así que 20 - 1 = 19 */
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #6f1ca0;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.test-title {
+  margin: 0;
+  font-size: 1.56rem;
+  font-weight: 700;
+  color: #1a202c;
+  text-align: start;
+  line-height: 1.56rem;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.test-description {
+  margin: 0;
+  line-height: 1.02rem;
+  color: #4a5568;
+  font-size: 1.02rem;
+  display: -webkit-box;
+  text-align: left;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 1.8em;
+  /* Altura mínima para 1 línea */
+}
+
+/* META INFORMATION - ESTRUCTURA SIMPLIFICADA */
+.test-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-top: 1px solid #f0e6ff;
+  background: #fafaff;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.meta-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.questions-count {
+  background: linear-gradient(135deg, #6f1ca0 0%, #e2750f 100%);
+  color: white;
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(111, 28, 160, 0.25);
+  white-space: nowrap;
+}
+
+.created-date {
+  font-style: italic;
+  color: #a0aec0;
+  font-size: 0.96rem;
+  white-space: nowrap;
+}
+
+.view-button {
+  background: linear-gradient(135deg, #6f1ca0 0%, #e2750f 100%);
+  color: white;
+  border: none;
+  padding: 10px 19px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.96rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(111, 28, 160, 0.25);
+  white-space: nowrap;
+  min-width: 80px;
+}
+
+.view-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(111, 28, 160, 0.35);
+}
+
+/* RESPONSIVE DESIGN CORREGIDO */
+@media (max-width: 768px) {
+  .test-cards-container {
+    padding: 24px 16px;
+    gap: 16px;
+  }
+
+  .test-card {
+    grid-template-columns: 80px 1fr;
+    min-height: 140px;
+  }
+
+  .test-card-header {
+    padding: 20px 12px;
+  }
+
+  .emoji-selector {
+    width: 56px;
+    height: 56px;
+    padding: 12px;
+  }
+
+  .emoji-display {
+    font-size: 1.75em;
+  }
+
+  .test-main-content {
+    padding: 20px;
+  }
+
+  .test-title {
+    font-size: 1.15rem;
+    min-height: 2.6em;
+  }
+
+  .test-description {
+    min-height: 3em;
+  }
+
+  .test-meta {
+    padding: 12px 20px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .meta-left {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .test-cards-container {
+    padding: 16px 12px;
+    gap: 12px;
+  }
+
+  .test-card {
+    grid-template-columns: 70px 1fr;
+    min-height: 140px;
+  }
+
+  .test-card-header {
+    padding: 16px 8px;
+  }
+
+  .emoji-selector {
+    width: 48px;
+    height: 48px;
+    padding: 8px;
+  }
+
+  .emoji-display {
+    font-size: 1.5em;
+  }
+
+  .test-main-content {
+    padding: 16px;
+    gap: 8px;
+  }
+
+  .test-title {
+    font-size: 1.1rem;
+    min-height: 2.4em;
+  }
+
+  .test-description {
+    font-size: 0.9rem;
+    min-height: 2.8em;
+  }
+
+  .emoji-picker {
+    grid-template-columns: repeat(4, 1fr);
+    min-width: 180px;
+    padding: 12px;
+    
+  }
+}
+
+/* FIXES ESPECÍFICOS PARA SUPERPOSICIÓN */
+.test-card>* {
+  position: relative;
+  z-index: 2;
+}
+
+.emoji-selector-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  z-index: 100;
+}
+
+/* Asegurar que el contenido no se superponga */
+.test-content-area {
+  position: relative;
+  z-index: 1;
+}
+
+.test-main-content,
+.test-meta {
+  position: relative;
+  z-index: 2;
+}

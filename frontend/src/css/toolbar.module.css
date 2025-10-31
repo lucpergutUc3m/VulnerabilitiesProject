@@ -1,0 +1,263 @@
+.toolbar {
+  background:rgba(255, 255, 255, 0.5);
+  box-shadow: 0 2px 4px rgba(165, 165, 165, 0.4);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+}
+
+.toolbarContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  max-width: 2000px;
+  margin: 0 auto;
+}
+
+/* Sección del logo */
+.logoSection {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.logo {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+.logo img {
+    width: 160%;
+    height: 160%;
+    object-fit: contain;
+}
+
+.appName {
+  font-size: 2.5rem;
+  font-weight: 900;
+  margin-left: 39px;
+  font-family: 'Poppins', sans-serif;
+  color: #9e520a ;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+
+
+}
+
+/* Navegación */
+.navigation {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.navLink {
+  text-decoration: none;
+  color: #4a5568;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.navLink:hover {
+  color: #667eea;
+  background-color: #f7fafc;
+}
+
+.navLink::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0.75rem;
+  right: 0.75rem;
+  height: 2px;
+  background: #667eea;
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+}
+
+.navLink:hover::after {
+  transform: scaleX(1);
+}
+
+/* Sección de usuario */
+.userSection {
+  position: relative;
+}
+
+/* Botón de login */
+.loginButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #6f1ca0 0%, #e2750fa1 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+.loginButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+}
+
+.loginIcon {
+  display: flex;
+  align-items: center;
+}
+
+/* Botón de usuario */
+.userButton {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: none;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.userButton:hover {
+  background-color: #f7fafc;
+}
+
+.userAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e2e8f0;
+}
+
+.userIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #edf2f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4a5568;
+  border: 2px solid #e2e8f0;
+}
+
+.userName {
+  font-weight: 500;
+  color: #2d3748;
+}
+
+/* Menú de usuario */
+.userMenuContainer {
+  position: relative;
+}
+
+.userMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  z-index: 1001;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.userInfo {
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.userEmail {
+  font-size: 0.875rem;
+  color: #718096;
+  margin: 0;
+}
+
+.menuDivider {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 0;
+}
+
+.menuItem {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: #4a5568;
+  font-size: 0.9rem;
+}
+
+.menuItem:hover {
+  background-color: #f7fafc;
+  color: #667eea;
+}
+
+.logoutItem {
+  color: #e53e3e;
+}
+
+.logoutItem:hover {
+  color: #c53030;
+  background-color: #fed7d7;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .toolbarContent {
+    padding: 0.75rem 1rem;
+  }
+
+  .navigation {
+    gap: 1rem;
+  }
+
+  .navLink {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .userName {
+    display: none;
+  }
+
+  .loginButton span {
+    display: none;
+  }
+
+  .loginButton {
+    padding: 0.75rem;
+  }
+}

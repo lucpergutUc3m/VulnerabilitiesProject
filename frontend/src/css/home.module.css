@@ -1,0 +1,201 @@
+.home {
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.container {
+  width: 100%;
+  box-sizing: border-box;
+  padding-top: 2rem;
+  text-align: center;
+}
+
+.contentWrapper {
+  width: 100%;
+  box-sizing: border-box;
+  padding-top: 0;
+}
+
+.mainContent {
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Scrollbar discreto para mainContent */
+.mainContent::-webkit-scrollbar {
+  width: 4px;
+}
+
+.mainContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mainContent::-webkit-scrollbar-thumb {
+  background: #cac9c9;
+  border-radius: 4px;
+}
+
+.mainContent::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.containerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 95%;
+  box-sizing: border-box;
+  margin: 0 auto;
+  height: 60px;
+  margin-top: 2rem;
+}
+
+.welcomeSection {
+  width: 95%;
+  box-sizing: border-box;
+  margin: 0 auto 2rem auto;
+  animation: slideDown 0.6s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcomeCard {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 8px 32px rgba(111, 28, 160, 0.15);
+  border: 1px solid rgba(111, 28, 160, 0.1);
+}
+
+.welcomeIcon {
+  font-size: 3rem;
+  line-height: 1;
+  flex-shrink: 0;
+  animation: wave 2s ease-in-out infinite;
+}
+
+@keyframes wave {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(14deg);
+  }
+  75% {
+    transform: rotate(-14deg);
+  }
+}
+
+.welcomeContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.welcomeTitle {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  background-image: linear-gradient(90deg, #6f1ca0, #e2750f);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  letter-spacing: -0.5px;
+}
+
+.welcomeSubtitle {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #666666;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.containerHeaderTitle {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  padding-left: 10px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.addButton {
+  padding: 0.7rem 1.2rem;
+  background: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(111, 28, 160, 0.3);
+  display: flex;
+  align-items: center;
+  height: fit-content;
+  margin: 0;
+}
+
+.gradientText {
+  background-image: linear-gradient(90deg, #6f1ca0, #e2750f);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  display: inline-block;
+}
+
+.addButton:hover {
+  box-shadow: 0 4px 12px rgba(111, 28, 160, 0.4);
+  transform: translateY(-1px);
+}
+
+.addButton:active {
+  transform: translateY(0);
+}
+
+.welcomeMessage,
+.loginPrompt {
+  background: white;
+  color: #6f1ca0;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.welcomeMessage h2 {
+  color: #e2750f;
+  margin-bottom: 1rem;
+}
+
+.loginPrompt h2 {
+  color:#6f1ca0;
+  margin-bottom: 1rem;
+}
