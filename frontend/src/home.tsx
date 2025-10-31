@@ -85,6 +85,20 @@ const Home: React.FC = () => {
       <main className={styles.mainContent}>
         {currentUser ? (
           <div className={styles.contentWrapper}>
+            <div className={styles.welcomeSection}>
+              <div className={styles.welcomeCard}>
+                <div className={styles.welcomeIcon}>👋</div>
+                <div className={styles.welcomeContent}>
+                  <h2 className={styles.welcomeTitle}>
+                    ¡Bienvenido, {currentUser.name}!
+                  </h2>
+                  <p className={styles.welcomeSubtitle}>
+                    Aquí puedes gestionar y realizar tus cuestionarios de manera segura y eficiente.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className={styles.containerHeader}>
               <h1 className={styles.containerHeaderTitle}>Tus Test Añadidos</h1>
               <button className={styles.addButton} onClick={handleAddQuestion}>
