@@ -1,4 +1,4 @@
-.loginPage {
+.registerPage {
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -111,94 +111,19 @@
     text-decoration: underline;
 }
 
-.features {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e2e8f0;
-}
-
-.feature {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: #4a5568;
-    font-size: 0.9rem;
-}
-
-.featureIcon {
-    font-size: 1.5rem;
-}
-
-.heroSection {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 2rem;
-    color: white;
-}
-
-.heroContent {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.heroTitle {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin: 0;
-    line-height: 1.2;
-}
-
-.heroText {
-    font-size: 1.1rem;
-    opacity: 0.9;
-    line-height: 1.6;
-    margin: 0;
-}
-
-.testimonial {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 1.5rem;
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-}
-
-.testimonialText {
-    font-size: 1rem;
-    font-style: italic;
-    margin: 0 0 0.5rem;
-    opacity: 0.95;
-}
-
-.testimonialAuthor {
-    font-size: 0.9rem;
-    opacity: 0.8;
-    margin: 0;
-}
-
 @media (max-width: 768px) {
     .container {
         grid-template-columns: 1fr;
         gap: 2rem;
         padding: 1rem;
+        width: 90%;
     }
 
     .content {
         padding: 2rem 1.5rem;
     }
 
-    .heroSection {
-        display: none;
-    }
-
     .title {
         font-size: 1.5rem;
-    }
-
-    .heroTitle {
-        font-size: 1.8rem;
     }
 }

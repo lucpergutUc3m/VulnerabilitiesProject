@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import LoginForm from '../components/loginForm';
 import type { LoginFormData, AuthResponse } from '../types/auth';
 import { config } from '@env';
@@ -89,6 +89,16 @@ const LoginPage: React.FC = () => {
             isLoading={isAuthLoading}
             error={authErrorMessage}
           />
+
+          {/* Link to register */}
+          <div className={styles.footer}>
+            <p className={styles.footerText}>
+              Don't have an account?{' '}
+              <Link to="/register" className={styles.link}>
+                Create one
+              </Link>
+            </p>
+          </div>
         </div>
 
       </div>

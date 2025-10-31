@@ -2,17 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Toolbar from './components/toolbar';
 import { TestCardList } from './components/testCard';
+import CreateTestModal from './components/createTestModal';
 import { useTests } from './hooks/useTests';
+import { testService } from './services/testService';
+import type { Test } from './services/testService';
 import styles from './css/home.module.css';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
-  const { tests, loading, error } = useTests();
+  const { tests, loading, error, refetch } = useTests();
   const [currentUser, setCurrentUser] = useState<{
     name: string;
     email: string;
     avatar?: string;
   } | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string>('');
 
   useEffect(() => {
     const storedUserData = localStorage.getItem('user');
@@ -44,35 +49,25 @@ const Home: React.FC = () => {
   };
 
   const handleAddQuestion = () => {
-    // Crear un input file invisible
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = '.json';
-    fileInput.style.display = 'none';
-    
-    fileInput.addEventListener('change', (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          try {
-            const content = event.target?.result as string;
-            const jsonData = JSON.parse(content);
-            console.log('Archivo cargado:', jsonData);
-            // Aquí puedes procesar el archivo JSON cargado
-            // Por ejemplo, enviar a un backend o actualizar el estado
-          } catch (error) {
-            console.error('Error al leer el archivo:', error);
-            alert('Error: El archivo no es un JSON válido');
-          }
-        };
-        reader.readAsText(file);
-      }
-    });
-    
-    // Disparar el click del input file
-    fileInput.click();
+    setIsModalOpen(true);
   };
+
+  const handleCreateTest = async (testData: Omit<Test, 'id'>) => {
+    try {
+      setSubmitError('');
+      await testService.createTest(testData);
+      
+      // Refrescar la lista de tests
+      await refetch();
+      
+      setIsModalOpen(false);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al crear el test';
+      setSubmitError(errorMessage);
+      throw err; // Re-lanzar para que el modal también maneje el error
+    }
+  };
+
   return (
     <div className={styles.home}>
       <Toolbar
@@ -106,6 +101,7 @@ const Home: React.FC = () => {
               </button>
             </div>
 
+            {submitError && <p className={styles.error}>{submitError}</p>}
             {loading && <p>Cargando tests...</p>}
             {error && <p className={styles.error}>Error: {error}</p>}
             {!loading && !error && (
@@ -119,6 +115,13 @@ const Home: React.FC = () => {
           </div>
         )}
       </main>
+
+      {/* Create Test Modal */}
+      <CreateTestModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleCreateTest}
+      />
     </div>
   );
 };

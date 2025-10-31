@@ -11,25 +11,31 @@ export const useTests = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const loadTests = async () => {
-            try {
-                setLoading(true);
-                const testsData = await testService.getAllTests();
-                setTests(testsData);
-                setError(null);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Error al cargar los tests');
-                console.error('Error in useTests:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const loadTests = async () => {
+        try {
+            setLoading(true);
+            const testsData = await testService.getAllTests();
+            setTests(testsData);
+            setError(null);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error al cargar los tests');
+            console.error('Error in useTests:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         loadTests();
     }, []);
 
-    return { tests, loading, error };
+    // Función para refrescar manualmente la lista
+    const refetch = async () => {
+        testService.clearCache(); // Limpiar caché antes de recargar
+        await loadTests();
+    };
+
+    return { tests, loading, error, refetch };
 };
 
 export const useTestById = (testId: number | string | undefined) => {

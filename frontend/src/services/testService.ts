@@ -99,6 +99,41 @@ class TestService {
     clearCache(): void {
         this.testsData = null;
     }
+
+    /**
+     * Crea un nuevo test enviándolo al backend
+     */
+    async createTest(testData: Omit<Test, 'id'>): Promise<Test> {
+        try {
+            // Obtener la URL base de la API desde la configuración
+            const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+            
+            const response = await fetch(`${apiBaseUrl}/tests`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Si tienes autenticación, añade el token aquí
+                    // 'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                },
+                body: JSON.stringify(testData),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const createdTest = await response.json() as Test;
+            
+            // Limpiar caché para forzar recarga de tests
+            this.clearCache();
+            
+            return createdTest;
+        } catch (error) {
+            console.error('Error creating test:', error);
+            throw error;
+        }
+    }
 }
 
 // Exportar instancia singleton
