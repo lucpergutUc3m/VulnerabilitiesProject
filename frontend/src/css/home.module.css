@@ -4,16 +4,17 @@
   box-sizing: border-box;
 }
 
-.mainContent {
-  width: 100%;
-  box-sizing: border-box;
-}
-
 .container {
   width: 100%;
   box-sizing: border-box;
   padding-top: 2rem;
   text-align: center;
+}
+
+.contentWrapper {
+  width: 100%;
+  box-sizing: border-box;
+  padding-top: 0;
 }
 
 .mainContent {
@@ -22,7 +23,28 @@
   flex-direction: column;
   align-items: center;
   min-height: calc(100vh - 80px);
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  overflow-x: hidden;
   box-sizing: border-box;
+}
+
+/* Scrollbar discreto para mainContent */
+.mainContent::-webkit-scrollbar {
+  width: 4px;
+}
+
+.mainContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mainContent::-webkit-scrollbar-thumb {
+  background: #cac9c9;
+  border-radius: 4px;
+}
+
+.mainContent::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .containerHeader {
@@ -82,7 +104,8 @@
 
 .welcomeMessage,
 .loginPrompt {
-  background: rgb(255, 255, 255);
+  background: white;
+  color: #6f1ca0;
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -93,11 +116,11 @@
 }
 
 .welcomeMessage h2 {
-  color: #38a169;
+  color: #e2750f;
   margin-bottom: 1rem;
 }
 
 .loginPrompt h2 {
-  color: #667eea;
+  color:#6f1ca0;
   margin-bottom: 1rem;
 }

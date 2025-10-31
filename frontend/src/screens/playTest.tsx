@@ -1,73 +1,63 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import styles from '../css/playTest.module.css';
+import { VscDebugStart } from "react-icons/vsc";
+import { IoMdArrowBack } from "react-icons/io";
+import { useTestById } from '../hooks/useTests';
+import type { Question } from '../services/testService';
+import { MdEdit } from "react-icons/md";
 
-interface Question {
-    id: number;
-    question: string;
-    options: string[];
-    correctAnswer: number;
-    explanation?: string;
-}
-
-interface Test {
-    id: number;
-    title: string;
-    topic: string;
-    description: string;
-    questions: Question[];
-    timeLimit?: number;
-    createdBy: string;
+interface LocationState {
+    showQuestions?: boolean;
+    questions?: Question[];
 }
 
 const TestStartPage = () => {
     const { testId } = useParams();
     const navigate = useNavigate();
-    const [test, setTest] = useState<Test | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-
-    useEffect(() => {
-        const fetchTest = async () => {
-            try {
-                const mockTest: Test = {
-                    id: 1,
-                    title: "Historia del Arte Renacentista",
-                    topic: "Arte",
-                    description: "Test completo sobre los principales artistas y obras del Renacimiento italiano",
-                    questions: [
-                        {
-                            id: 1,
-                            question: "¿Quién pintó la Capilla Sixtina?",
-                            options: ["Leonardo da Vinci", "Miguel Ángel", "Rafael", "Donatello"],
-                            correctAnswer: 1,
-                            explanation: "Miguel Ángel pintó la bóveda de la Capilla Sixtina entre 1508 y 1512."
-                        },
-                        {
-                            id: 2,
-                            question: "¿Cuál es la obra más famosa de Leonardo da Vinci?",
-                            options: ["La Última Cena", "La Gioconda", "El Hombre de Vitruvio", "Todas las anteriores"],
-                            correctAnswer: 3,
-                            explanation: "Todas son obras extremadamente famosas de Leonardo da Vinci."
-                        }
-                    ]
-                };
-                setTest(mockTest);
-            } catch (err) {
-                setError('Error al cargar el test');
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchTest();
-    }, [testId]);
+    const location = useLocation();
+    const { test, loading, error } = useTestById(testId);
+    
+    // Obtener el estado de navegación para ver si se deben mostrar preguntas
+    const state = location.state as LocationState;
+    const showQuestions = state?.showQuestions || false;
+    const stateQuestions = state?.questions || [];
 
     const handleStartTest = () => {
-        navigate(`/test/${testId}/play`);
+        navigate(`/test/${testId}/questions`);
     };
 
     const handleGoBack = () => {
         navigate("/");
+    };
+
+    const handleEditClick = () => {
+        // Crear un input file invisible
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.json';
+        fileInput.style.display = 'none';
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const content = event.target?.result as string;
+                        const jsonData = JSON.parse(content);
+                        console.log('Archivo cargado:', jsonData);
+                        // Aquí puedes procesar el archivo JSON cargado
+                    } catch (error) {
+                        console.error('Error al leer el archivo:', error);
+                        alert('Error: El archivo no es un JSON válido');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+        
+        // Disparar el click del input file
+        fileInput.click();
     };
 
     if (loading) {
@@ -91,18 +81,21 @@ const TestStartPage = () => {
         );
     }
 
+    const questionsToShow = showQuestions && stateQuestions.length > 0 ? stateQuestions : null;
+
     return (
         <div className={styles.container}>
             <div className={styles.backButtonContainer}>
                 <button onClick={handleGoBack} className={styles.backButton}>
-                    ← Volver al inicio
+                    <IoMdArrowBack />
+                    Volver al inicio
                 </button>
             </div>
 
             <div className={styles.testCard}>
                 <div className={styles.testHeader}>
                     <div className={styles.emojiSection}>
-                        <span className={styles.testEmoji}>🎨</span>
+                        <span className={styles.testEmoji}>{test.emoji}</span>
                     </div>
                     <div className={styles.testInfo}>
                         <div className={styles.topicBadge}>
@@ -115,17 +108,65 @@ const TestStartPage = () => {
                             <strong>{test.questions.length}</strong>
                             <span>preguntas</span>
                         </div>
+                        
                     </div>
-                </div>
-
-                <div className={styles.actions}>
+                    <button
+                        onClick={handleEditClick}
+                        className={styles.editButton}
+                    >
+                        <span className={styles.buttonIcon}>
+                            <MdEdit />
+                        </span>
+                        Editar
+                    </button>
                     <button
                         onClick={handleStartTest}
                         className={styles.startButton}
                     >
-                        <span className={styles.buttonIcon}>🚀</span>
+                        <span className={styles.buttonIcon}>
+                            <VscDebugStart />
+                        </span>
                         Comenzar Test
                     </button>
+                    
+                </div>
+
+                {questionsToShow && (
+                    <div className={styles.questionsPreviewSection}>
+                        <h3 className={styles.questionsPreviewTitle}>
+                            Preguntas del test ({questionsToShow.length})
+                        </h3>
+                        <div className={styles.questionsPreviewContainer}>
+                            {questionsToShow.map((question, index) => (
+                                <div key={question.id} className={styles.questionPreview}>
+                                    <div className={styles.questionPreviewHeader}>
+                                        <span className={styles.questionPreviewNumber}>
+                                            Pregunta {index + 1}
+                                        </span>
+                                    </div>
+                                    <p className={styles.questionPreviewText}>
+                                        {question.question}
+                                    </p>
+                                    <div className={styles.optionsPreview}>
+                                        {question.options.map((option, optIndex) => (
+                                            <div 
+                                                key={optIndex}
+                                                className={styles.optionPreview}
+                                            >
+                                                <span className={styles.optionPreviewLetter}>
+                                                    {String.fromCharCode(65 + optIndex)}
+                                                </span>
+                                                <span>{option}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                <div className={styles.actions}>
                     <button
                         onClick={handleGoBack}
                         className={styles.cancelButton}

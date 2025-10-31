@@ -1,0 +1,446 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.testCard {
+    background-color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    padding: 3rem;
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+.progressSection {
+    margin-bottom: 2rem;
+}
+
+.progressHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.progressCounter {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.progressBar {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+}
+
+.questionSection {
+    margin-bottom: 2rem;
+    min-height: 300px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    flex: 1;
+}
+
+/* Custom scrollbar */
+.questionSection::-webkit-scrollbar {
+    width: 6px;
+}
+
+.questionSection::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.questionSection::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.questionSection::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.questionContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.questionText {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a202c;
+    line-height: 1.4;
+    margin: 0;
+    padding: 0;
+}
+
+.optionsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.option {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1a202c;
+}
+
+.option:hover:not(:disabled) {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+}
+
+.option:disabled {
+    cursor: not-allowed;
+}
+
+.option.selected {
+    border-color: #667eea;
+    background: #f0f4ff;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.option.correct {
+    border-color: #10b981;
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.option.correct::after {
+    content: '✓';
+    margin-left: auto;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #10b981;
+}
+
+.option.incorrect {
+    border-color: #ef4444;
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.option.incorrect::after {
+    content: '✗';
+    margin-left: auto;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #ef4444;
+}
+
+.optionLabel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #f3e8ff 0%, #faf5ff 100%);
+    border-radius: 8px;
+    font-weight: 700;
+    color: #667eea;
+    flex-shrink: 0;
+}
+
+.option.selected .optionLabel,
+.option.correct .optionLabel,
+.option.incorrect .optionLabel {
+    background: currentColor;
+    color: white;
+}
+
+.optionText {
+    flex: 1;
+}
+
+.explanationBox {
+    padding: 1.5rem;
+    background: #f0fdf4;
+    border-left: 4px solid #10b981;
+    border-radius: 8px;
+    color: #1b5e20;
+}
+
+.explanationBox h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #059669;
+}
+
+.explanationBox p {
+    margin: 0;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.navigationButtons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 2rem;
+    border-top: 1px solid #f1f5f9;
+    min-height: 50px;
+    flex-shrink: 0;
+}
+
+.prevButton,
+.nextButton,
+.finishButton {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.prevButton {
+    background: transparent;
+    border: 1.5px solid #e2e8f0;
+    color: #64748b;
+}
+
+.prevButton:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #475569;
+}
+
+.prevButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.nextButton {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.nextButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.nextButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.finishButton {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.finishButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+.finishButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.questionIndicators {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.indicator.answered {
+    background: #667eea;
+}
+
+.indicator.active {
+    width: 24px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.errorContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #dc2626;
+    font-size: 18px;
+    padding: 2rem;
+}
+
+.spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #667eea;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 2s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+/* Botón de volver centrado */
+.backButtonContainer {
+    width: 100%;
+    margin-bottom: 2.5rem;
+    padding-left: 35rem;
+    display: flex;
+    justify-content: flex-start;
+}
+
+/* Variante para TestScreen (con posición absoluta) */
+.backButtonContainer.fixed {
+    position: absolute;
+
+    z-index: 10;
+    width: auto;
+    margin-bottom: 0;
+}
+
+.backButton {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.backButton:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateX(-2px);
+}
+
+
+/* Loading styles */
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: white;
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .testCard {
+        padding: 1.5rem;
+        max-width: 95%;
+    }
+
+    .questionText {
+        font-size: 1.2rem;
+    }
+
+    .navigationButtons {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .prevButton,
+    .nextButton,
+    .finishButton {
+        flex: 1 1 48%;
+    }
+
+    .questionIndicators {
+        flex-basis: 100%;
+        order: 2;
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 1rem 0.5rem;
+    }
+
+    .testCard {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+
+    .questionText {
+        font-size: 1rem;
+    }
+
+    .option {
+        padding: 1rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    .navigationButtons {
+        flex-direction: column;
+    }
+
+    .prevButton,
+    .nextButton,
+    .finishButton {
+        width: 100%;
+        flex: 1 1 auto;
+    }
+}

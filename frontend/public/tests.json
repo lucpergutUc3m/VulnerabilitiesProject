@@ -1,0 +1,214 @@
+{
+  "tests": [
+    {
+      "id": 1,
+      "title": "Historia del Arte Renacentista",
+      "topic": "Arte",
+      "emoji": "🎨",
+      "description": "Test completo sobre los principales artistas y obras del Renacimiento italiano",
+      "timeLimit": 30,
+      "createdBy": "Admin",
+      "questions": [
+        {
+          "id": 1,
+          "question": "¿Quién pintó la Capilla Sixtina?",
+          "options": [
+            "Leonardo da Vinci",
+            "Miguel Ángel",
+            "Rafael",
+            "Donatello"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Miguel Ángel pintó la bóveda de la Capilla Sixtina entre 1508 y 1512."
+        },
+        {
+          "id": 2,
+          "question": "¿Cuál es la obra más famosa de Leonardo da Vinci?",
+          "options": [
+            "La Última Cena",
+            "La Gioconda",
+            "El Hombre de Vitruvio",
+            "Todas las anteriores"
+          ],
+          "correctAnswer": 3,
+          "explanation": "Todas son obras extremadamente famosas de Leonardo da Vinci."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Fundamentos de JavaScript",
+      "topic": "Programación",
+      "emoji": "💻",
+      "description": "Evaluación de conceptos básicos de JavaScript incluyendo funciones, arrays y objetos.",
+      "timeLimit": 45,
+      "createdBy": "Admin",
+      "questions": [
+        {
+          "id": 1,
+          "question": "¿Qué es una función flecha en JavaScript?",
+          "options": [
+            "Una función que apunta hacia arriba",
+            "Una sintaxis moderna para definir funciones",
+            "Una función que solo devuelve valores numéricos",
+            "Un operador de comparación"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Las funciones flecha son una sintaxis moderna de ES6 para definir funciones de manera más concisa."
+        },
+        {
+          "id": 2,
+          "question": "¿Cuál es la diferencia entre var, let y const?",
+          "options": [
+            "No hay diferencia",
+            "El scope y la reasignabilidad son diferentes",
+            "Solo var se puede usar",
+            "const no existe en JavaScript"
+          ],
+          "correctAnswer": 1,
+          "explanation": "var tiene scope de función, let y const tienen scope de bloque. const no se puede reasignar, let sí."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Biología Celular",
+      "topic": "Ciencias",
+      "emoji": "🧬",
+      "description": "Estudio profundo de la estructura y función de las células, incluyendo procesos metabólicos.",
+      "timeLimit": 50,
+      "createdBy": "Admin",
+      "questions": [
+        {
+          "id": 1,
+          "question": "¿Cuál es el orgánulo responsable de la respiración celular?",
+          "options": [
+            "Núcleo",
+            "Mitocondria",
+            "Retículo endoplásmico",
+            "Golgi"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Las mitocondrias son el centro energético de la célula, donde ocurre la respiración aeróbica."
+        },
+        {
+          "id": 2,
+          "question": "¿Qué es la fotosíntesis?",
+          "options": [
+            "Un proceso de respiración",
+            "Convertir luz en energía química",
+            "Un tipo de división celular",
+            "Un proceso solo en animales"
+          ],
+          "correctAnswer": 1,
+          "explanation": "La fotosíntesis es el proceso mediante el cual las plantas convierten la luz solar en energía química."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Historia Medieval Europea",
+      "topic": "Historia",
+      "emoji": "🏰",
+      "description": "Test sobre los períodos Medieval y Feudal en Europa, sus características políticas y sociales.",
+      "timeLimit": 40,
+      "createdBy": "Admin",
+      "questions": [
+        {
+          "id": 1,
+          "question": "¿En qué siglo comenzó la Edad Media?",
+          "options": [
+            "Siglo V",
+            "Siglo VI",
+            "Siglo VII",
+            "Siglo VIII"
+          ],
+          "correctAnswer": 0,
+          "explanation": "La Edad Media comenzó aproximadamente en el siglo V con la caída del Imperio Romano Occidental."
+        },
+        {
+          "id": 2,
+          "question": "¿Cuál era la estructura social del feudalismo?",
+          "options": [
+            "Rey, nobles, clérigos y siervos",
+            "Solo nobles y campesinos",
+            "Una sociedad igualitaria",
+            "Solo militares y civiles"
+          ],
+          "correctAnswer": 0,
+          "explanation": "El feudalismo tenía una estructura jerárquica con el Rey en la cúspide, seguido de nobles, clérigos y siervos."
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Matemáticas Avanzadas",
+      "topic": "Matemáticas",
+      "emoji": "🔢",
+      "description": "Conceptos de cálculo integral, derivadas y aplicaciones en problemas reales.",
+      "timeLimit": 60,
+      "createdBy": "Admin",
+      "questions": [
+        {
+          "id": 1,
+          "question": "¿Qué es una derivada?",
+          "options": [
+            "Un número entero",
+            "La tasa de cambio instantánea de una función",
+            "Un tipo de fracción",
+            "Una operación lógica"
+          ],
+          "correctAnswer": 1,
+          "explanation": "La derivada representa la tasa de cambio instantánea o la pendiente de una función en un punto específico."
+        },
+        {
+          "id": 2,
+          "question": "¿Para qué se utiliza la integral?",
+          "options": [
+            "Solo para sumar números",
+            "Para calcular áreas y volúmenes",
+            "Para restar funciones",
+            "No tiene aplicación práctica"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Las integrales se utilizan para calcular áreas bajo curvas, volúmenes y muchas otras aplicaciones en física e ingeniería."
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Geografía Política",
+      "topic": "Geografía",
+      "emoji": "🌍",
+      "description": "Análisis de fronteras, geopolítica y división de estados en el mundo actual.",
+      "timeLimit": 35,
+      "createdBy": "Admin",
+      "questions": [
+        {
+          "id": 1,
+          "question": "¿Cuál es la capital de Australia?",
+          "options": [
+            "Sydney",
+            "Melbourne",
+            "Canberra",
+            "Brisbane"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Canberra es la capital de Australia, aunque Sydney y Melbourne son ciudades mucho más conocidas."
+        },
+        {
+          "id": 2,
+          "question": "¿Cuántos continentes hay?",
+          "options": [
+            "5 continentes",
+            "6 continentes",
+            "7 continentes",
+            "8 continentes"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Generalmente se reconocen 7 continentes: África, América del Norte, América del Sur, Antártida, Asia, Europa y Oceanía."
+        }
+      ]
+    }
+  ]
+}

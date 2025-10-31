@@ -1,17 +1,9 @@
 import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import styles from '../css/tests.card.module.css';
 import { FaEye, FaPlay } from 'react-icons/fa';
-
-interface Test {
-    id: number;
-    title: string;
-    topic: string;
-    description: string;
-    questionsCount: number;
-    createdAt: string;
-    emoji: string;
-}
+import type { Test } from '../services/testService';
 
 interface TestCardProps {
     test: Test;
@@ -33,6 +25,7 @@ const TestCard = ({
     openPickerId,
     onOpenPickerChange
 }: TestCardProps) => {
+    const navigate = useNavigate();
     const [selectedEmoji, setSelectedEmoji] = useState(test.emoji || defaultEmoji);
     const selectorRef = useRef<HTMLDivElement>(null);
     const pickerRef = useRef<HTMLDivElement>(null);
@@ -53,6 +46,17 @@ const TestCard = ({
         onOpenPickerChange?.(isOpen ? null : test.id);
     };
 
+    const handleViewTest = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        navigate(`/test/${test.id}`, { 
+            state: { showQuestions: true, questions: test.questions } 
+        });
+    };
+
+    const handlePlayTest = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        navigate(`/test/${test.id}/questions`);
+    };
 
     const getPickerStyle = () => {
         if (!isOpen || !selectorRef.current) {
@@ -60,7 +64,6 @@ const TestCard = ({
         }
 
         const rect = selectorRef.current.getBoundingClientRect();
-
         const horizontalOffset = 63;
 
         return {
@@ -103,18 +106,15 @@ const TestCard = ({
                     <div className={styles['test-meta']}>
                         <div className={styles['meta-left']}>
                             <span className={styles['questions-count']}>
-                                {test.questionsCount || 0} preguntas
-                            </span>
-                            <span className={styles['created-date']}>
-                                {new Date(test.createdAt).toLocaleDateString()}
+                                {test.questions.length} preguntas
                             </span>
                         </div>
-                        <button className={styles['view-button']}>
+                        <button className={styles['view-button']} onClick={handleViewTest}>
                             <FaEye className={styles['button-icon']} />
                             Watch
                         </button>
 
-                        <button className={styles['play-button']}>
+                        <button className={styles['play-button']} onClick={handlePlayTest}>
                             <FaPlay className={styles['button-icon']} />
                             Play
                         </button>
