@@ -14,7 +14,7 @@ interface AppConfig {
 
 export const config: AppConfig = {
   api: {
-    baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
+    baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
     timeout: parseInt(import.meta.env.VITE_API_TIMEOUT || '5000'),
   },
   app: {

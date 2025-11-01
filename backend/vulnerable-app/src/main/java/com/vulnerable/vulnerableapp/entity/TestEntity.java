@@ -33,4 +33,10 @@ public class TestEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private AppUser owner;
+    
+    @Column
+    private String category;
+    
+    @Column
+    private String emoji;
 }

@@ -1,6 +1,5 @@
 package com.vulnerable.vulnerableapp.service;
 
-import com.vulnerable.vulnerableapp.dto.CategoryResponse;
 import com.vulnerable.vulnerableapp.dto.ShareTestRequest;
 import com.vulnerable.vulnerableapp.dto.TestRequest;
 import com.vulnerable.vulnerableapp.dto.TestResponse;
@@ -19,8 +18,6 @@ public class TestService {
     
     private final TestEntityRepository testRepository;
     private final TestSharedWithRepository sharedRepository;
-    private final TestCategoryRepository testCategoryRepository;
-    private final CategoryRepository categoryRepository;
     private final AppUserRepository userRepository;
     
     @Transactional
@@ -31,25 +28,9 @@ public class TestService {
                 .questionsJson(request.getQuestionsJson())
                 .timeLimitMinutes(request.getTimeLimitMinutes())
                 .owner(owner)
+                .category(request.getCategory())
+                .emoji(request.getEmoji())
                 .build();
-        
-        test = testRepository.save(test);
-        return convertToResponse(test);
-    }
-    
-    @Transactional
-    public TestResponse updateTest(AppUser user, Long testId, TestRequest request) {
-        TestEntity test = testRepository.findById(testId)
-                .orElseThrow(() -> new RuntimeException("Test not found"));
-        
-        if (!test.getOwner().getId().equals(user.getId())) {
-            throw new RuntimeException("You don't have permission to update this test");
-        }
-        
-        test.setTitle(request.getTitle());
-        test.setDescription(request.getDescription());
-        test.setQuestionsJson(request.getQuestionsJson());
-        test.setTimeLimitMinutes(request.getTimeLimitMinutes());
         
         test = testRepository.save(test);
         return convertToResponse(test);
@@ -101,12 +82,6 @@ public class TestService {
                 .collect(Collectors.toList());
     }
     
-    public List<TestResponse> searchTests(AppUser user, String keyword) {
-        return testRepository.searchAccessibleTests(user, keyword).stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
-    }
-    
     @Transactional
     public void shareTest(AppUser owner, Long testId, ShareTestRequest request) {
         TestEntity test = testRepository.findById(testId)
@@ -146,60 +121,7 @@ public class TestService {
         sharedRepository.deleteByTestAndSharedWithUser(test, userToUnshareWith);
     }
     
-    @Transactional
-    public void addCategoryToTest(AppUser user, Long testId, Long categoryId) {
-        TestEntity test = testRepository.findById(testId)
-                .orElseThrow(() -> new RuntimeException("Test not found"));
-        
-        if (!test.getOwner().getId().equals(user.getId())) {
-            throw new RuntimeException("You don't have permission to modify this test");
-        }
-        
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-        
-        if (category.getStatus() != 1) {
-            throw new RuntimeException("Category is not approved");
-        }
-        
-        if (testCategoryRepository.findByTestAndCategory(test, category).isPresent()) {
-            throw new RuntimeException("Category already added to this test");
-        }
-        
-        TestCategory testCategory = TestCategory.builder()
-                .test(test)
-                .category(category)
-                .build();
-        
-        testCategoryRepository.save(testCategory);
-    }
-    
-    @Transactional
-    public void removeCategoryFromTest(AppUser user, Long testId, Long categoryId) {
-        TestEntity test = testRepository.findById(testId)
-                .orElseThrow(() -> new RuntimeException("Test not found"));
-        
-        if (!test.getOwner().getId().equals(user.getId())) {
-            throw new RuntimeException("You don't have permission to modify this test");
-        }
-        
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-        
-        testCategoryRepository.deleteByTestAndCategory(test, category);
-    }
-    
     private TestResponse convertToResponse(TestEntity test) {
-        List<CategoryResponse> categories = testCategoryRepository.findByTest(test).stream()
-                .map(tc -> CategoryResponse.builder()
-                        .id(tc.getCategory().getId())
-                        .name(tc.getCategory().getName())
-                        .emoji(tc.getCategory().getEmoji())
-                        .status(tc.getCategory().getStatus())
-                        .createdById(tc.getCategory().getCreatedBy().getId())
-                        .build())
-                .collect(Collectors.toList());
-        
         return TestResponse.builder()
                 .id(test.getId())
                 .title(test.getTitle())
@@ -208,7 +130,8 @@ public class TestService {
                 .timeLimitMinutes(test.getTimeLimitMinutes())
                 .ownerId(test.getOwner().getId())
                 .ownerEmail(test.getOwner().getEmail())
-                .categories(categories)
+                .category(test.getCategory())
+                .emoji(test.getEmoji())
                 .build();
     }
 }

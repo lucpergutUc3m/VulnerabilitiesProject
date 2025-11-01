@@ -18,20 +18,20 @@ public class UserService {
         return UserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .fullName(user.getFullName())
+                .name(user.getName())
                 .role(user.getRole())
                 .build();
     }
     
     @Transactional
     public UserResponse updateCurrentUser(AppUser user, UpdateUserRequest request) {
-        user.setFullName(request.getFullName());
+        user.setName(request.getName());
         userRepository.save(user);
         
         return UserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .fullName(user.getFullName())
+                .name(user.getName())
                 .role(user.getRole())
                 .build();
     }

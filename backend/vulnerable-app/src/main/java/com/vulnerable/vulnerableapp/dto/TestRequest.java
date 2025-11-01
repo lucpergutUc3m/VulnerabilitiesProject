@@ -18,4 +18,6 @@ public class TestRequest {
     private String description;
     private String questionsJson;
     private Integer timeLimitMinutes;
+    private String category;
+    private String emoji;
 }

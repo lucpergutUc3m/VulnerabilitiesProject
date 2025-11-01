@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/categories").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/db-console.html").permitAll()
                 
                 // Admin endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")

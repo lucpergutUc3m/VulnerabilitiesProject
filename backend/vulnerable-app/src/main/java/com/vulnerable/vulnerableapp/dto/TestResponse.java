@@ -19,5 +19,6 @@ public class TestResponse {
     private Integer timeLimitMinutes;
     private Long ownerId;
     private String ownerEmail;
-    private List<CategoryResponse> categories;
+    private String category;
+    private String emoji;
 }

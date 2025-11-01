@@ -20,9 +20,6 @@ const LoginPage: React.FC = () => {
     setAuthErrorMessage('');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
       // Log configuration for debugging
       if (config.app.debug) {
         console.log('API Base URL:', config.api.baseUrl);
@@ -30,34 +27,34 @@ const LoginPage: React.FC = () => {
         console.log('Environment:', config.app.environment);
       }
       
-      // En producción usarías:
-      // const response = await fetch(`${config.api.baseUrl}/auth/login`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // });
-      
-    
-      // Successful response simulation
-      const mockAuthResponse: AuthResponse = {
-        user: {
-          id: '1',
-          name: 'John Doe',
-          email: formData.email
-        },
-        token: 'mock-jwt-token',
-        expiresIn: 3600
-      };
+      // Make real API call to backend
+      const response = await fetch(`${config.api.baseUrl}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Invalid credentials. Please verify your email and password.');
+      }
+
+      // Parse the response
+      const authResponse: AuthResponse = await response.json();
 
       // Save to localStorage
-      localStorage.setItem('authToken', mockAuthResponse.token);
-      localStorage.setItem('user', JSON.stringify(mockAuthResponse.user));
+      localStorage.setItem('authToken', authResponse.token);
+      localStorage.setItem('user', JSON.stringify(authResponse.user));
 
       // Redirect to previous page or home
       navigate(redirectPathAfterLogin, { replace: true });
       
     } catch (error) {
-      setAuthErrorMessage('Invalid credentials. Please verify your email and password.');
+      if (error instanceof Error) {
+        setAuthErrorMessage(error.message);
+      } else {
+        setAuthErrorMessage('Invalid credentials. Please verify your email and password.');
+      }
       console.error('Login error:', error);
     } finally {
       setIsAuthLoading(false);

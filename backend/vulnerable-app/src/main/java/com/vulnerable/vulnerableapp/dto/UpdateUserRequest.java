@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateUserRequest {
     
-    @NotBlank(message = "Full name is required")
-    private String fullName;
+    @NotBlank(message = "Name is required")
+    private String name;
 }

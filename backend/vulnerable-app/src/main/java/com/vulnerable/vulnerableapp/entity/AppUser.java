@@ -27,25 +27,20 @@ public class AppUser implements UserDetails {
     @Column(unique = true, nullable = false)
     private String email;
     
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
+    @Column(name = "name", nullable = false)
+    private String name;
     
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
     
     @Column(nullable = false)
-    private Integer role = 0; // 0=normal, 1=superuser, 2=admin
+    private Integer role = 0; // 0=normal, 1=admin
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return switch (role) {
-            case 2 -> List.of(
-                new SimpleGrantedAuthority("ROLE_ADMIN"),
-                new SimpleGrantedAuthority("ROLE_SUPERUSER"),
-                new SimpleGrantedAuthority("ROLE_USER")
-            );
             case 1 -> List.of(
-                new SimpleGrantedAuthority("ROLE_SUPERUSER"),
+                new SimpleGrantedAuthority("ROLE_ADMIN"),
                 new SimpleGrantedAuthority("ROLE_USER")
             );
             default -> List.of(new SimpleGrantedAuthority("ROLE_USER"));

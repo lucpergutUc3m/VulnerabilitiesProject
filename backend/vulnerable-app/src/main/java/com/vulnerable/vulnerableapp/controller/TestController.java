@@ -28,14 +28,6 @@ public class TestController {
         return ResponseEntity.ok(testService.createTest(user, request));
     }
     
-    @PutMapping("/{testId}")
-    public ResponseEntity<TestResponse> updateTest(
-            @AuthenticationPrincipal AppUser user,
-            @PathVariable Long testId,
-            @Valid @RequestBody TestRequest request) {
-        return ResponseEntity.ok(testService.updateTest(user, testId, request));
-    }
-    
     @DeleteMapping("/{testId}")
     public ResponseEntity<Map<String, String>> deleteTest(
             @AuthenticationPrincipal AppUser user,
@@ -61,13 +53,6 @@ public class TestController {
         return ResponseEntity.ok(testService.getSharedTests(user));
     }
     
-    @GetMapping("/search")
-    public ResponseEntity<List<TestResponse>> searchTests(
-            @AuthenticationPrincipal AppUser user,
-            @RequestParam String q) {
-        return ResponseEntity.ok(testService.searchTests(user, q));
-    }
-    
     @PostMapping("/{testId}/share")
     public ResponseEntity<Map<String, String>> shareTest(
             @AuthenticationPrincipal AppUser user,
@@ -84,23 +69,5 @@ public class TestController {
             @Valid @RequestBody ShareTestRequest request) {
         testService.unshareTest(user, testId, request);
         return ResponseEntity.ok(Map.of("message", "Test unshared successfully"));
-    }
-    
-    @PostMapping("/{testId}/categories")
-    public ResponseEntity<Map<String, String>> addCategoryToTest(
-            @AuthenticationPrincipal AppUser user,
-            @PathVariable Long testId,
-            @RequestBody Map<String, Long> body) {
-        testService.addCategoryToTest(user, testId, body.get("categoryId"));
-        return ResponseEntity.ok(Map.of("message", "Category added successfully"));
-    }
-    
-    @DeleteMapping("/{testId}/categories/{categoryId}")
-    public ResponseEntity<Map<String, String>> removeCategoryFromTest(
-            @AuthenticationPrincipal AppUser user,
-            @PathVariable Long testId,
-            @PathVariable Long categoryId) {
-        testService.removeCategoryFromTest(user, testId, categoryId);
-        return ResponseEntity.ok(Map.of("message", "Category removed successfully"));
     }
 }

@@ -31,3 +31,24 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Security - Environment Files ###
+.env
+.env.local
+.env.production
+*.env.production
+
+# Keep only templates
+!.env.*.template
+!.env.development
+
+### Database Files ###
+/data/
+*.db
+
+### Secrets and Credentials ###
+secrets/
+*.key
+*.pem
+*.p12
+*.jks

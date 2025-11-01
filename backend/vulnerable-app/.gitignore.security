@@ -1,0 +1,22 @@
+# .gitignore additions for security
+
+# Environment files with sensitive data
+.env
+.env.local
+.env.production
+*.env.production
+
+# Keep only templates
+!.env.*.template
+!.env.development
+
+# Database files
+/data/
+*.db
+
+# Secrets and credentials
+secrets/
+*.key
+*.pem
+*.p12
+*.jks

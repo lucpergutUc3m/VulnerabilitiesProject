@@ -16,9 +16,6 @@ const RegisterPage: React.FC = () => {
     setAuthErrorMessage('');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
       // Log configuration for debugging
       if (config.app.debug) {
         console.log('API Base URL:', config.api.baseUrl);
@@ -26,43 +23,28 @@ const RegisterPage: React.FC = () => {
         console.log('Environment:', config.app.environment);
       }
       
-      // En producción usarías:
-      // const response = await fetch(`${config.api.baseUrl}/auth/register`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     name: formData.name,
-      //     email: formData.email,
-      //     password: formData.password
-      //   })
-      // });
-      
-      // Check for duplicate email (mock validation)
-      const existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-      const emailExists = existingUsers.some((user: any) => user.email === formData.email);
-      
-      if (emailExists) {
-        throw new Error('An account with this email already exists');
+      // Make real API call to backend
+      const response = await fetch(`${config.api.baseUrl}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Registration failed with status: ${response.status}`);
       }
 
-      // Successful response simulation
-      const mockAuthResponse: RegisterResponse = {
-        user: {
-          id: Math.random().toString(36).substring(7),
-          name: formData.name,
-          email: formData.email
-        },
-        token: 'mock-jwt-token-' + Date.now(),
-        expiresIn: 3600
-      };
-
-      // Save user to mock database
-      existingUsers.push(mockAuthResponse.user);
-      localStorage.setItem('registeredUsers', JSON.stringify(existingUsers));
+      // Parse the response
+      const authResponse: RegisterResponse = await response.json();
 
       // Save auth data to localStorage
-      localStorage.setItem('authToken', mockAuthResponse.token);
-      localStorage.setItem('user', JSON.stringify(mockAuthResponse.user));
+      localStorage.setItem('authToken', authResponse.token);
+      localStorage.setItem('user', JSON.stringify(authResponse.user));
 
       // Redirect to home page
       navigate('/', { replace: true });
