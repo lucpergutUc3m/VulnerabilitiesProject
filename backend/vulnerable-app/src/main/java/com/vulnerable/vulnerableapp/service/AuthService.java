@@ -116,8 +116,13 @@ public class AuthService {
         String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
-            tokenBlacklist.blacklistToken(token);
-            log.info("✓ Token added to blacklist");
+            try {
+                String userEmail = jwtUtil.extractUsername(token);
+                tokenBlacklist.blacklistToken(token, userEmail);
+                log.info("✓ Token added to blacklist for user: {}", userEmail);
+            } catch (Exception e) {
+                log.error("Failed to blacklist token: {}", e.getMessage());
+            }
         }
         
         log.info("✅ LOGOUT SUCCESSFUL");
