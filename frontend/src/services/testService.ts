@@ -3,6 +3,8 @@
  * Punto de entrada único: public/tests.json
  */
 
+import { config } from '@env';
+
 export interface Question {
     id: number;
     question: string;
@@ -14,12 +16,17 @@ export interface Question {
 export interface Test {
     id: number;
     title: string;
-    topic: string;
+    topic?: string;
+    category?: string;
     emoji: string;
     description: string;
     questions: Question[];
+    questionsJson?: string;
     timeLimit?: number;
-    createdBy: string;
+    timeLimitMinutes?: number;
+    createdBy?: string;
+    ownerId?: number;
+    ownerEmail?: string;
 }
 
 export interface TestsData {
@@ -82,7 +89,7 @@ class TestService {
      */
     async getTestsByTopic(topic: string): Promise<Test[]> {
         const tests = await this.loadTests();
-        return tests.filter(test => test.topic.toLowerCase() === topic.toLowerCase());
+        return tests.filter(test => (test.topic || '').toLowerCase() === topic.toLowerCase());
     }
 
     /**
@@ -106,24 +113,51 @@ class TestService {
     async createTest(testData: Omit<Test, 'id'>): Promise<Test> {
         try {
             // Obtener la URL base de la API desde la configuración
-            const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-            
+            const apiBaseUrl = config.api.baseUrl;
+
+            // Obtener el token de autenticación
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                throw new Error('No authentication token found. Please login first.');
+            }
+
+            // Transformar las questions a JSON string si es necesario
+            const questionsJson = typeof testData.questions === 'string' 
+                ? testData.questions 
+                : JSON.stringify(testData.questions);
+
+            // Preparar el payload para el backend
+            const payload = {
+                title: testData.title,
+                topic: testData.topic,
+                category: testData.topic, // El backend usa 'category'
+                emoji: testData.emoji,
+                description: testData.description,
+                questionsJson: questionsJson,
+                timeLimitMinutes: testData.timeLimit || 30
+            };
+
+            console.log('Creating test with payload:', payload);
+
             const response = await fetch(`${apiBaseUrl}/tests`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Si tienes autenticación, añade el token aquí
-                    // 'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(testData),
+                body: JSON.stringify(payload),
             });
+
+            console.log('Response status:', response.status);
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
             }
 
-            const createdTest = await response.json() as Test;
+            const createdTest = await response.json();
+            
+            console.log('Test created successfully:', createdTest);
             
             // Limpiar caché para forzar recarga de tests
             this.clearCache();

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from '../css/toolbar.module.css';
 import logoImg from '../assets/images/logo.svg';
-
+import { useNavigate } from 'react-router-dom';
 const UserIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -30,7 +30,7 @@ interface ToolbarProps {
 
 const Toolbar: React.FC<ToolbarProps> = ({ appName, onLoginClick, onLogout, user }) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-
+  const navigate = useNavigate();
   const handleUserIconClick = () => {
     if (user) {
       setIsUserMenuOpen(!isUserMenuOpen);
@@ -49,24 +49,24 @@ const Toolbar: React.FC<ToolbarProps> = ({ appName, onLoginClick, onLogout, user
       <div className={styles.toolbarContent}>
         {/* Logo and app name */}
         <div className={styles.logoSection}>
-           <div className={styles.logo}>
-              <img src={logoImg} alt="Logo" />
-            </div>
+          <div className={styles.logo}>
+            <img src={logoImg} alt="Logo" />
+          </div>
         </div>
         <h1 className={styles.appName}>{appName}</h1>
         {/* User section/login */}
         <div className={styles.userSection}>
           {user ? (
             <div className={styles.userMenuContainer}>
-              <button 
+              <button
                 className={styles.userButton}
                 onClick={handleUserIconClick}
                 aria-label="User menu"
               >
                 {user.avatar ? (
-                  <img 
-                    src={user.avatar} 
-                    alt={user.name} 
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
                     className={styles.userAvatar}
                   />
                 ) : (
@@ -76,13 +76,22 @@ const Toolbar: React.FC<ToolbarProps> = ({ appName, onLoginClick, onLogout, user
                 )}
                 <span className={styles.userName}>{user.name}</span>
               </button>
-              
+
               {isUserMenuOpen && (
                 <div className={styles.userMenu}>
                   <div className={styles.userInfo}>
                     <p className={styles.userEmail}>{user.email}</p>
                   </div>
-                  <button 
+
+
+                  <button
+                    className={`${styles.menuItem}`}
+                    onClick={()=>navigate('/user')}
+                  >
+                    Ver Perfil
+                  </button>
+
+                  <button
                     className={`${styles.menuItem} ${styles.logoutItem}`}
                     onClick={handleUserMenuLogout}
                   >
@@ -92,7 +101,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ appName, onLoginClick, onLogout, user
               )}
             </div>
           ) : (
-            <button 
+            <button
               className={styles.loginButton}
               onClick={onLoginClick}
               aria-label="Sign in"

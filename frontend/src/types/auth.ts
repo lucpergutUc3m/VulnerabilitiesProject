@@ -4,12 +4,15 @@ export interface LoginFormData {
   rememberMe?: boolean;
 }
 
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  role?: number;
+}
+
 export interface AuthResponse {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-  };
+  user: User;
   token: string;
   expiresIn: number;
 }

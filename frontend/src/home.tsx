@@ -6,16 +6,13 @@ import CreateTestModal from './components/createTestModal';
 import { useTests } from './hooks/useTests';
 import { testService } from './services/testService';
 import type { Test } from './services/testService';
+import type { User } from './types/auth';
 import styles from './css/home.module.css';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { tests, loading, error, refetch } = useTests();
-  const [currentUser, setCurrentUser] = useState<{
-    name: string;
-    email: string;
-    avatar?: string;
-  } | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string>('');
 

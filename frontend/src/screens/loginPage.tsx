@@ -34,6 +34,11 @@ const LoginPage: React.FC = () => {
         body: JSON.stringify(formData)
       });
 
+      console.log('Response Status:', response.status);
+      console.log('Response Headers:', {
+        contentType: response.headers.get('content-type'),
+      });
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Invalid credentials. Please verify your email and password.');
@@ -41,6 +46,11 @@ const LoginPage: React.FC = () => {
 
       // Parse the response
       const authResponse: AuthResponse = await response.json();
+      
+      // Log the auth response for debugging
+      console.log('Auth Response:', authResponse);
+      console.log('Token:', authResponse.token);
+      console.log('User:', authResponse.user);
 
       // Save to localStorage
       localStorage.setItem('authToken', authResponse.token);

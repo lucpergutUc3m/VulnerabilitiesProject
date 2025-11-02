@@ -6,6 +6,7 @@ import RegisterPage from './screens/registerPage';
 import TestStartPage from '../src/screens/playTest';
 import TestScreen from '../src/screens/testScreen';
 import TestResults from '../src/screens/testResults';
+import UserProfile from './screens/userProfile';
 
 const App: React.FC = () => {
   return (
@@ -14,6 +15,7 @@ const App: React.FC = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/user" element={<UserProfile />} />
         <Route path="/test/:testId" element={<TestStartPage />} />
         <Route path="/test/:testId/questions" element={<TestScreen />} />
         <Route path="/test/:testId/results" element={<TestResults />} />
