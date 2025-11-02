@@ -23,11 +23,6 @@ public class AdminController {
     private final UserService userService;
     private final TestService testService;
     
-    @GetMapping("/users")
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
-    }
-    
     @PutMapping("/users/{userId}")
     public ResponseEntity<UserResponse> updateUser(
             @PathVariable Long userId,
