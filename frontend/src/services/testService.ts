@@ -29,12 +29,13 @@ export interface Test {
     ownerEmail?: string;
 }
 
-export interface TestsData {
-    tests: Test[];
+export interface TestUpdatePrivacy {
+    isPublic: boolean;
 }
 
+
 class TestService {
-    private testsData: TestsData | null = null;
+    private testsData: Test[] | null = null;
     private isLoading = false;
 
     /**
@@ -42,7 +43,7 @@ class TestService {
      */
     async loadTests(): Promise<Test[]> {
         if (this.testsData) {
-            return this.testsData.tests;
+            return this.testsData;
         }
 
         if (this.isLoading) {
@@ -50,17 +51,28 @@ class TestService {
             while (this.isLoading) {
                 await new Promise(resolve => setTimeout(resolve, 100));
             }
-            return (this.testsData as TestsData | null)?.tests ?? [];
+            return (this.testsData as Test[] | null) ?? [];
         }
 
         this.isLoading = true;
         try {
-            const response = await fetch('/tests.json');
+            // Obtener el token de autenticación
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                throw new Error('No authentication token found. Please login first.');
+            }
+
+            const response = await fetch(`${config.api.baseUrl}/tests`, {
+                method: 'GET',
+                headers: { 
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            this.testsData = await response.json() as TestsData;
-            return this.testsData.tests;
+            this.testsData = await response.json() as Test[];
+            return this.testsData;
         } catch (error) {
             console.error('Error loading tests:', error);
             throw error;
@@ -73,8 +85,20 @@ class TestService {
      * Obtiene un test específico por su ID
      */
     async getTestById(testId: number): Promise<Test | undefined> {
-        const tests = await this.loadTests();
-        return tests.find(test => test.id === testId);
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            throw new Error('No authentication token found. Please login first.');
+        }
+        const test = await fetch(`${config.api.baseUrl}/tests/${testId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (!test.ok) {
+            throw new Error(`HTTP error! status: ${test.status}`);
+        }
+        return test.json() as Promise<Test>;
     }
 
     /**
@@ -168,6 +192,37 @@ class TestService {
             throw error;
         }
     }
+
+    async updateTestPrivacy(testId: number, privacyData: TestUpdatePrivacy): Promise<Test> {
+        const response = await fetch(`${config.api.baseUrl}/tests/${testId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            },
+            body: JSON.stringify(privacyData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return response.json() as Promise<Test>;
+    }
+
+    async deleteTest(testId: number): Promise<void> {
+        const response = await fetch(`${config.api.baseUrl}/tests/${testId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    }
+
 }
 
 // Exportar instancia singleton

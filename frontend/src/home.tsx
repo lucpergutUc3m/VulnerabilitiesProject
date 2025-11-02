@@ -8,6 +8,7 @@ import { testService } from './services/testService';
 import type { Test } from './services/testService';
 import type { User } from './types/auth';
 import styles from './css/home.module.css';
+import { config } from '@env';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -15,25 +16,37 @@ const Home: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string>('');
+  const [hasLoadedTests, setHasLoadedTests] = useState(false);
 
   useEffect(() => {
     const storedUserData = localStorage.getItem('user');
     if (storedUserData) {
       try {
-        setCurrentUser(JSON.parse(storedUserData));
+        const userData = JSON.parse(storedUserData);
+        setCurrentUser(userData);
       } catch (error) {
         console.error('Failed to parse user data:', error);
       }
     }
   }, []);
 
+  // Refetch tests when user logs in (only once)
+  useEffect(() => {
+    if (currentUser && localStorage.getItem('authToken') && !hasLoadedTests) {
+      refetch();
+      setHasLoadedTests(true);
+    }
+  }, [currentUser, hasLoadedTests, refetch]);
+
   const handleNavigateToLogin = () => {
     navigate('/login');
   };
 
-  const handleUserLogout = () => {
+  const handleUserLogout = async () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+
+    await fetch(`${config.api.baseUrl}/auth/logout`, { method: 'POST' });
 
     setCurrentUser(null);
 
@@ -93,16 +106,47 @@ const Home: React.FC = () => {
 
             <div className={styles.containerHeader}>
               <h1 className={styles.containerHeaderTitle}>Tus Test Añadidos</h1>
-              <button className={styles.addButton} onClick={handleAddQuestion}>
-                <span className={styles.gradientText}>Añadir cuestionario</span>
-              </button>
+              {!loading && !error && tests && tests.length > 0 && (
+                <button className={styles.addButton} onClick={handleAddQuestion}>
+                  <span className={styles.gradientText}>Añadir cuestionario</span>
+                </button>
+              )}
             </div>
 
             {submitError && <p className={styles.error}>{submitError}</p>}
             {loading && <p>Cargando tests...</p>}
             {error && <p className={styles.error}>Error: {error}</p>}
-            {!loading && !error && (
+            {!loading && !error && tests && tests.length > 0 && (
               <TestCardList tests={tests} onEmojiChange={handleEmojiChange} />
+            )}
+            
+            {!loading && !error && tests && tests.length === 0 && (
+              <div className={styles.emptyState}>
+                <div className={styles.emptyStateIcon}>📚</div>
+                <h3 className={styles.emptyStateTitle}>No tienes tests todavía</h3>
+                <p className={styles.emptyStateDescription}>
+                  Comienza tu viaje de aprendizaje creando tu primer cuestionario.
+                  ¡Es fácil y rápido!
+                </p>
+                <button className={styles.emptyStateButton} onClick={handleAddQuestion}>
+                  <span className={styles.buttonIcon}>✨</span>
+                  Crear mi primer test
+                </button>
+                <div className={styles.emptyStateFooter}>
+                  <div className={styles.featureItem}>
+                    <span className={styles.featureIcon}>⚡</span>
+                    <span>Fácil de crear</span>
+                  </div>
+                  <div className={styles.featureItem}>
+                    <span className={styles.featureIcon}>🎯</span>
+                    <span>Personalizable</span>
+                  </div>
+                  <div className={styles.featureItem}>
+                    <span className={styles.featureIcon}>📊</span>
+                    <span>Resultados al instante</span>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         ) : (
