@@ -1,4 +1,4 @@
-package com.vulnerable.vulnerableapp.dto;
+package com.vulnerable.vulnerableapp.dto.tests;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApiResponse {
-    private boolean success;
-    private String message;
+public class UpdateTestRequest {
+    private Boolean isPublic;
 }

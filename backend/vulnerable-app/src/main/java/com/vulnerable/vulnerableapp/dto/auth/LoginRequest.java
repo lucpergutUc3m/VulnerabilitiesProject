@@ -1,4 +1,4 @@
-package com.vulnerable.vulnerableapp.dto;
+package com.vulnerable.vulnerableapp.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

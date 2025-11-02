@@ -1,4 +1,4 @@
-package com.vulnerable.vulnerableapp.dto;
+package com.vulnerable.vulnerableapp.dto.tests;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,11 +14,11 @@ import java.util.List;
 public class TestResponse {
     private Long id;
     private String title;
-    private String description;
-    private String questionsJson;
-    private Integer timeLimitMinutes;
-    private Long ownerId;
-    private String ownerEmail;
-    private String category;
+    private String topic;
     private String emoji;
+    private String description;
+    private List<QuestionResponse> questions;
+    private Integer timeLimit;
+    private String createdBy;
+    private Boolean isPublic;
 }

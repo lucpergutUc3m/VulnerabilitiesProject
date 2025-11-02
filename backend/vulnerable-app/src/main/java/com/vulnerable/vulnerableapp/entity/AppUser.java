@@ -1,11 +1,13 @@
 package com.vulnerable.vulnerableapp.entity;
 
+import com.vulnerable.vulnerableapp.utils.UserRoles;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.SpringSecurityCoreVersion;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -20,7 +22,9 @@ import java.util.List;
 @AllArgsConstructor
 public class AppUser implements UserDetails {
     
-    @Id
+    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
+
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
@@ -34,17 +38,18 @@ public class AppUser implements UserDetails {
     private String passwordHash;
     
     @Column(nullable = false)
-    private Integer role = 0; // 0=normal, 1=admin
+    @Builder.Default
+    private Integer role = UserRoles.USER.getValue(); // 0=normal, 1=admin
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return switch (role) {
-            case 1 -> List.of(
-                new SimpleGrantedAuthority("ROLE_ADMIN"),
-                new SimpleGrantedAuthority("ROLE_USER")
+        if (role.equals(UserRoles.ADMIN.getValue())) {
+            return List.of(
+                new SimpleGrantedAuthority("ROLE_" + UserRoles.ADMIN.getName().toUpperCase()),
+                new SimpleGrantedAuthority("ROLE_" + UserRoles.USER.getName().toUpperCase())
             );
-            default -> List.of(new SimpleGrantedAuthority("ROLE_USER"));
-        };
+        }
+        return List.of(new SimpleGrantedAuthority("ROLE_" + UserRoles.USER.getName().toUpperCase()));
     }
     
     @Override
@@ -55,25 +60,5 @@ public class AppUser implements UserDetails {
     @Override
     public String getUsername() {
         return email;
-    }
-    
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-    
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-    
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-    
-    @Override
-    public boolean isEnabled() {
-        return true;
     }
 }

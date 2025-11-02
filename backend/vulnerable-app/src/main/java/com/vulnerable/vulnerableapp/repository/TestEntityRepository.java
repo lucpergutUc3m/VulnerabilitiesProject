@@ -13,16 +13,10 @@ import java.util.List;
 public interface TestEntityRepository extends JpaRepository<TestEntity, Long> {
     List<TestEntity> findByOwner(AppUser owner);
     
-    @Query("SELECT t FROM TestEntity t WHERE t.owner = :user OR t.id IN " +
-           "(SELECT ts.test.id FROM TestSharedWith ts WHERE ts.sharedWithUser = :user)")
+    // Find all public tests or tests owned by the user
+    @Query("SELECT t FROM TestEntity t WHERE t.isPublic = true OR t.owner = :user")
     List<TestEntity> findAccessibleByUser(@Param("user") AppUser user);
     
-    @Query("SELECT t FROM TestEntity t JOIN TestSharedWith ts ON t.id = ts.test.id " +
-           "WHERE ts.sharedWithUser = :user")
-    List<TestEntity> findSharedWithUser(@Param("user") AppUser user);
-    
-    @Query("SELECT t FROM TestEntity t WHERE " +
-           "(t.owner = :user OR t.id IN (SELECT ts.test.id FROM TestSharedWith ts WHERE ts.sharedWithUser = :user)) " +
-           "AND (LOWER(t.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(t.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    List<TestEntity> searchAccessibleTests(@Param("user") AppUser user, @Param("keyword") String keyword);
+    // Find only public tests
+    List<TestEntity> findByIsPublicTrue();
 }

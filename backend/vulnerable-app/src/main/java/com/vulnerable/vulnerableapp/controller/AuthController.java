@@ -1,9 +1,10 @@
 package com.vulnerable.vulnerableapp.controller;
 
-import com.vulnerable.vulnerableapp.dto.AuthResponse;
-import com.vulnerable.vulnerableapp.dto.LoginRequest;
-import com.vulnerable.vulnerableapp.dto.RegisterRequest;
+import com.vulnerable.vulnerableapp.dto.auth.AuthResponse;
+import com.vulnerable.vulnerableapp.dto.auth.LoginRequest;
+import com.vulnerable.vulnerableapp.dto.auth.RegisterRequest;
 import com.vulnerable.vulnerableapp.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,19 @@ public class AuthController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("❌ POST /api/auth/login - Login failed: {}", e.getMessage());
+            throw e;
+        }
+    }
+    
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        log.info("🔵 POST /api/auth/logout - Logout request received");
+        try {
+            authService.logout(request);
+            log.info("✅ POST /api/auth/logout - Logout successful (200 OK)");
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            log.error("❌ POST /api/auth/logout - Logout failed: {}", e.getMessage());
             throw e;
         }
     }

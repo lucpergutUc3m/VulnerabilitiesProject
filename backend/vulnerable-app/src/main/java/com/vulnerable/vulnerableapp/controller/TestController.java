@@ -1,14 +1,12 @@
 package com.vulnerable.vulnerableapp.controller;
 
-import com.vulnerable.vulnerableapp.dto.ShareTestRequest;
-import com.vulnerable.vulnerableapp.dto.TestRequest;
-import com.vulnerable.vulnerableapp.dto.TestResponse;
-import com.vulnerable.vulnerableapp.entity.AppUser;
+import com.vulnerable.vulnerableapp.dto.tests.TestRequest;
+import com.vulnerable.vulnerableapp.dto.tests.TestResponse;
+import com.vulnerable.vulnerableapp.dto.tests.UpdateTestRequest;
 import com.vulnerable.vulnerableapp.service.TestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,52 +20,30 @@ public class TestController {
     private final TestService testService;
     
     @PostMapping
-    public ResponseEntity<TestResponse> createTest(
-            @AuthenticationPrincipal AppUser user,
-            @Valid @RequestBody TestRequest request) {
-        return ResponseEntity.ok(testService.createTest(user, request));
+    public ResponseEntity<TestResponse> createTest(@Valid @RequestBody TestRequest request) {
+        return ResponseEntity.ok(testService.createTest(request));
     }
     
     @DeleteMapping("/{testId}")
-    public ResponseEntity<Map<String, String>> deleteTest(
-            @AuthenticationPrincipal AppUser user,
-            @PathVariable Long testId) {
-        testService.deleteTest(user, testId);
+    public ResponseEntity<Map<String, String>> deleteTest(@PathVariable Long testId) {
+        testService.deleteTest(testId);
         return ResponseEntity.ok(Map.of("message", "Test deleted successfully"));
     }
     
     @GetMapping("/{testId}")
-    public ResponseEntity<TestResponse> getTest(
-            @AuthenticationPrincipal AppUser user,
-            @PathVariable Long testId) {
-        return ResponseEntity.ok(testService.getTest(user, testId));
+    public ResponseEntity<TestResponse> getTest(@PathVariable Long testId) {
+        return ResponseEntity.ok(testService.getTest(testId));
     }
     
-    @GetMapping("/mine")
-    public ResponseEntity<List<TestResponse>> getMyTests(@AuthenticationPrincipal AppUser user) {
-        return ResponseEntity.ok(testService.getMyTests(user));
+    @GetMapping
+    public ResponseEntity<List<TestResponse>> getAllAccessibleTests() {
+        return ResponseEntity.ok(testService.getAllAccessibleTests());
     }
     
-    @GetMapping("/shared")
-    public ResponseEntity<List<TestResponse>> getSharedTests(@AuthenticationPrincipal AppUser user) {
-        return ResponseEntity.ok(testService.getSharedTests(user));
-    }
-    
-    @PostMapping("/{testId}/share")
-    public ResponseEntity<Map<String, String>> shareTest(
-            @AuthenticationPrincipal AppUser user,
+    @PutMapping("/{testId}")
+    public ResponseEntity<TestResponse> updateTest(
             @PathVariable Long testId,
-            @Valid @RequestBody ShareTestRequest request) {
-        testService.shareTest(user, testId, request);
-        return ResponseEntity.ok(Map.of("message", "Test shared successfully"));
-    }
-    
-    @PostMapping("/{testId}/unshare")
-    public ResponseEntity<Map<String, String>> unshareTest(
-            @AuthenticationPrincipal AppUser user,
-            @PathVariable Long testId,
-            @Valid @RequestBody ShareTestRequest request) {
-        testService.unshareTest(user, testId, request);
-        return ResponseEntity.ok(Map.of("message", "Test unshared successfully"));
+            @Valid @RequestBody UpdateTestRequest request) {
+        return ResponseEntity.ok(testService.updateTest(testId, request));
     }
 }

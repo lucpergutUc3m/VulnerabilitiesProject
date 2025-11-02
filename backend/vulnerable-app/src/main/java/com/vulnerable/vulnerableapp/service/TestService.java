@@ -1,11 +1,16 @@
 package com.vulnerable.vulnerableapp.service;
 
-import com.vulnerable.vulnerableapp.dto.ShareTestRequest;
-import com.vulnerable.vulnerableapp.dto.TestRequest;
-import com.vulnerable.vulnerableapp.dto.TestResponse;
-import com.vulnerable.vulnerableapp.entity.*;
-import com.vulnerable.vulnerableapp.repository.*;
+import com.vulnerable.vulnerableapp.dto.tests.TestRequest;
+import com.vulnerable.vulnerableapp.dto.tests.TestResponse;
+import com.vulnerable.vulnerableapp.dto.tests.UpdateTestRequest;
+import com.vulnerable.vulnerableapp.entity.AppUser;
+import com.vulnerable.vulnerableapp.entity.TestEntity;
+import com.vulnerable.vulnerableapp.mapper.TestMapper;
+import com.vulnerable.vulnerableapp.repository.TestEntityRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,30 +19,37 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TestService {
     
     private final TestEntityRepository testRepository;
-    private final TestSharedWithRepository sharedRepository;
-    private final AppUserRepository userRepository;
+    private final TestMapper testMapper;
     
-    @Transactional
-    public TestResponse createTest(AppUser owner, TestRequest request) {
-        TestEntity test = TestEntity.builder()
-                .title(request.getTitle())
-                .description(request.getDescription())
-                .questionsJson(request.getQuestionsJson())
-                .timeLimitMinutes(request.getTimeLimitMinutes())
-                .owner(owner)
-                .category(request.getCategory())
-                .emoji(request.getEmoji())
-                .build();
-        
-        test = testRepository.save(test);
-        return convertToResponse(test);
+    /**
+     * Get the currently authenticated user from SecurityContext
+     */
+    private AppUser getCurrentAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("No authenticated user found");
+        }
+        return (AppUser) authentication.getPrincipal();
     }
     
     @Transactional
-    public void deleteTest(AppUser user, Long testId) {
+    public TestResponse createTest(TestRequest request) {
+        AppUser owner = getCurrentAuthenticatedUser();
+        
+        TestEntity test = testMapper.toEntity(request, owner);
+        test = testRepository.save(test);
+        
+        return testMapper.toTestResponse(test);
+    }
+    
+    @Transactional
+    public void deleteTest(Long testId) {
+        AppUser user = getCurrentAuthenticatedUser();
+        
         TestEntity test = testRepository.findById(testId)
                 .orElseThrow(() -> new RuntimeException("Test not found"));
         
@@ -55,83 +67,54 @@ public class TestService {
         testRepository.delete(test);
     }
     
-    public TestResponse getTest(AppUser user, Long testId) {
+    public TestResponse getTest(Long testId) {
+        AppUser user = getCurrentAuthenticatedUser();
+        
         TestEntity test = testRepository.findById(testId)
                 .orElseThrow(() -> new RuntimeException("Test not found"));
         
-        // Check if user has access
-        boolean hasAccess = test.getOwner().getId().equals(user.getId()) ||
-                sharedRepository.existsByTestAndSharedWithUser(test, user);
+        // Check if user has access (owner or public test)
+        boolean hasAccess = test.getOwner().getId().equals(user.getId()) || test.getIsPublic();
         
         if (!hasAccess) {
             throw new RuntimeException("You don't have permission to view this test");
         }
         
-        return convertToResponse(test);
+        return testMapper.toTestResponse(test);
     }
     
-    public List<TestResponse> getMyTests(AppUser user) {
-        return testRepository.findByOwner(user).stream()
-                .map(this::convertToResponse)
+    public List<TestResponse> getAllAccessibleTests() {
+        AppUser user = getCurrentAuthenticatedUser();
+        
+        // Returns all public tests + user's own tests
+        return testRepository.findAccessibleByUser(user).stream()
+                .map(testMapper::toTestResponse)
                 .collect(Collectors.toList());
     }
     
-    public List<TestResponse> getSharedTests(AppUser user) {
-        return testRepository.findSharedWithUser(user).stream()
-                .map(this::convertToResponse)
+    public List<TestResponse> getAllTests() {
+        // Admin only - returns all tests
+        return testRepository.findAll().stream()
+                .map(testMapper::toTestResponse)
                 .collect(Collectors.toList());
     }
     
     @Transactional
-    public void shareTest(AppUser owner, Long testId, ShareTestRequest request) {
+    public TestResponse updateTest(Long testId, UpdateTestRequest request) {
+        AppUser user = getCurrentAuthenticatedUser();
+        
         TestEntity test = testRepository.findById(testId)
                 .orElseThrow(() -> new RuntimeException("Test not found"));
         
-        if (!test.getOwner().getId().equals(owner.getId())) {
-            throw new RuntimeException("You don't have permission to share this test");
+        if (!test.getOwner().getId().equals(user.getId())) {
+            throw new RuntimeException("You don't have permission to update this test");
         }
         
-        AppUser userToShareWith = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        if (sharedRepository.existsByTestAndSharedWithUser(test, userToShareWith)) {
-            throw new RuntimeException("Test already shared with this user");
+        if (request.getIsPublic() != null) {
+            test.setIsPublic(request.getIsPublic());
         }
         
-        TestSharedWith shared = TestSharedWith.builder()
-                .test(test)
-                .sharedWithUser(userToShareWith)
-                .build();
-        
-        sharedRepository.save(shared);
-    }
-    
-    @Transactional
-    public void unshareTest(AppUser owner, Long testId, ShareTestRequest request) {
-        TestEntity test = testRepository.findById(testId)
-                .orElseThrow(() -> new RuntimeException("Test not found"));
-        
-        if (!test.getOwner().getId().equals(owner.getId())) {
-            throw new RuntimeException("You don't have permission to unshare this test");
-        }
-        
-        AppUser userToUnshareWith = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        sharedRepository.deleteByTestAndSharedWithUser(test, userToUnshareWith);
-    }
-    
-    private TestResponse convertToResponse(TestEntity test) {
-        return TestResponse.builder()
-                .id(test.getId())
-                .title(test.getTitle())
-                .description(test.getDescription())
-                .questionsJson(test.getQuestionsJson())
-                .timeLimitMinutes(test.getTimeLimitMinutes())
-                .ownerId(test.getOwner().getId())
-                .ownerEmail(test.getOwner().getEmail())
-                .category(test.getCategory())
-                .emoji(test.getEmoji())
-                .build();
+        test = testRepository.save(test);
+        return testMapper.toTestResponse(test);
     }
 }

@@ -1,6 +1,8 @@
 package com.vulnerable.vulnerableapp.security;
 
 import com.vulnerable.vulnerableapp.service.CustomUserDetailsService;
+import com.vulnerable.vulnerableapp.utils.UserRoles;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,7 +48,7 @@ public class SecurityConfig {
                 .requestMatchers("/db-console.html").permitAll()
                 
                 // Admin endpoints
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/admin/**").hasRole(UserRoles.ADMIN.getName())
                 
                 // Authenticated endpoints
                 .requestMatchers("/api/**").authenticated()

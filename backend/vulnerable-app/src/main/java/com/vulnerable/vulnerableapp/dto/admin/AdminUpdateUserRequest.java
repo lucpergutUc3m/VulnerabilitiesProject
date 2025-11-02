@@ -1,4 +1,4 @@
-package com.vulnerable.vulnerableapp.dto;
+package com.vulnerable.vulnerableapp.dto.admin;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,10 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryResponse {
-    private Long id;
+public class AdminUpdateUserRequest {
     private String name;
-    private String emoji;
-    private Integer status;
-    private Long createdById;
+    private String password;
+    private Integer role;
 }

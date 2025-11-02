@@ -21,6 +21,12 @@ public class TestEntity {
     @Column(nullable = false)
     private String title;
     
+    @Column
+    private String topic;
+    
+    @Column
+    private String emoji;
+    
     @Column(columnDefinition = "TEXT")
     private String description;
     
@@ -34,9 +40,7 @@ public class TestEntity {
     @JoinColumn(name = "owner_id", nullable = false)
     private AppUser owner;
     
-    @Column
-    private String category;
-    
-    @Column
-    private String emoji;
+    @Column(name = "public", nullable = false)
+    @Builder.Default
+    private Boolean isPublic = false;
 }

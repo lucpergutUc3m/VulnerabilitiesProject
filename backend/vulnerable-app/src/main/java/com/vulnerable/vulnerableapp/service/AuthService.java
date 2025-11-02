@@ -1,9 +1,15 @@
 package com.vulnerable.vulnerableapp.service;
 
 import com.vulnerable.vulnerableapp.dto.*;
+import com.vulnerable.vulnerableapp.dto.auth.AuthResponse;
+import com.vulnerable.vulnerableapp.dto.auth.LoginRequest;
+import com.vulnerable.vulnerableapp.dto.auth.RegisterRequest;
 import com.vulnerable.vulnerableapp.entity.AppUser;
 import com.vulnerable.vulnerableapp.repository.AppUserRepository;
 import com.vulnerable.vulnerableapp.security.JwtUtil;
+import com.vulnerable.vulnerableapp.security.TokenBlacklist;
+import com.vulnerable.vulnerableapp.utils.UserRoles;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +26,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+    private final TokenBlacklist tokenBlacklist;
     
     public AuthResponse register(RegisterRequest request) {
         log.info("=== REGISTRATION REQUEST START ===");
@@ -37,7 +44,7 @@ public class AuthService {
                 .email(request.getEmail())
                 .name(request.getName())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .role(0) // Normal user by default
+                .role(UserRoles.USER.getValue()) // Normal user by default
                 .build();
         
         userRepository.save(user);
@@ -50,8 +57,8 @@ public class AuthService {
         log.info("=== REGISTRATION REQUEST END ===");
         
         return AuthResponse.builder()
-                .user(AuthResponse.UserInfo.builder()
-                        .id(user.getId().toString())
+                .user(UserResponse.builder()
+                        .id(user.getId())
                         .name(user.getName())
                         .email(user.getEmail())
                         .build())
@@ -91,13 +98,27 @@ public class AuthService {
         log.info("=== LOGIN REQUEST END ===");
         
         return AuthResponse.builder()
-                .user(AuthResponse.UserInfo.builder()
-                        .id(user.getId().toString())
+                .user(UserResponse.builder()
+                        .id(user.getId())
                         .name(user.getName())
                         .email(user.getEmail())
                         .build())
                 .token(token)
                 .expiresIn(jwtUtil.getExpirationTime())
                 .build();
+    }
+    
+    public void logout(HttpServletRequest request) {
+        log.info("=== LOGOUT REQUEST START ===");
+        
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            tokenBlacklist.blacklistToken(token);
+            log.info("✓ Token added to blacklist");
+        }
+        
+        log.info("✅ LOGOUT SUCCESSFUL");
+        log.info("=== LOGOUT REQUEST END ===");
     }
 }

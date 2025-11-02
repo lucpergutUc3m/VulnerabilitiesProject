@@ -1,4 +1,4 @@
-package com.vulnerable.vulnerableapp.dto;
+package com.vulnerable.vulnerableapp.dto.tests;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -15,9 +15,10 @@ public class TestRequest {
     @NotBlank(message = "Title is required")
     private String title;
     
+    private String topic;
+    private String emoji;
     private String description;
     private String questionsJson;
-    private Integer timeLimitMinutes;
-    private String category;
-    private String emoji;
+    private Integer timeLimit;
+    
 }
