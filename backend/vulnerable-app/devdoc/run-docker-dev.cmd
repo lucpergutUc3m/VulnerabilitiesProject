@@ -48,6 +48,9 @@ echo.
 REM Set the profile to 'docker-dev'
 set SPRING_PROFILES_ACTIVE=docker-dev
 
+REM Change to project root directory
+cd /d "%~dp0\.."
+
 REM Start the application
 call mvnw.cmd spring-boot:run
 
