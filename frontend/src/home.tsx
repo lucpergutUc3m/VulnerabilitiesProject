@@ -49,13 +49,14 @@ const Home: React.FC = () => {
     await fetch(`${config.api.baseUrl}/auth/logout`, { method: 'POST' });
 
     setCurrentUser(null);
+    setHasLoadedTests(false); // Reset loaded tests on logout
 
     navigate('/');
   };
 
   const handleEmojiChange = (testId: number, newEmoji: string) => {
-    console.log(`Test ${testId} cambió a emoji: ${newEmoji}`);
-    // Aquí puedes actualizar el estado o hacer una llamada API
+    console.log(`Test ${testId} changed to emoji: ${newEmoji}`);
+    // Here you can update state or make an API call
   };
 
   const handleAddQuestion = () => {
@@ -67,21 +68,29 @@ const Home: React.FC = () => {
       setSubmitError('');
       await testService.createTest(testData);
       
-      // Refrescar la lista de tests
+      // Refresh tests list
       await refetch();
       
       setIsModalOpen(false);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al crear el test';
+      const errorMessage = err instanceof Error ? err.message : 'Error creating test';
       setSubmitError(errorMessage);
-      throw err; // Re-lanzar para que el modal también maneje el error
+      throw err; // Re-throw so modal can also handle the error
     }
+  };
+
+  // Format welcome message based on time of day
+  const getWelcomeMessage = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
   };
 
   return (
     <div className={styles.home}>
       <Toolbar
-        appName="Cuestioneo "
+        appName="QuestionFlow"
         onLoginClick={handleNavigateToLogin}
         onLogout={handleUserLogout}
         user={currentUser}
@@ -95,26 +104,27 @@ const Home: React.FC = () => {
                 <div className={styles.welcomeIcon}>👋</div>
                 <div className={styles.welcomeContent}>
                   <h2 className={styles.welcomeTitle}>
-                    ¡Bienvenido, {currentUser.name}!
+                    {getWelcomeMessage()}, {currentUser.name}!
                   </h2>
                   <p className={styles.welcomeSubtitle}>
-                    Aquí puedes gestionar y realizar tus cuestionarios de manera segura y eficiente.
+                    Manage and take your quizzes in a secure and efficient way. 
+                    Create, customize, and track your learning progress.
                   </p>
                 </div>
               </div>
             </div>
 
             <div className={styles.containerHeader}>
-              <h1 className={styles.containerHeaderTitle}>Tus Test Añadidos</h1>
+              <h1 className={styles.containerHeaderTitle}>Your Questionnaires</h1>
               {!loading && !error && tests && tests.length > 0 && (
                 <button className={styles.addButton} onClick={handleAddQuestion}>
-                  <span className={styles.gradientText}>Añadir cuestionario</span>
+                  <span>+ Create New</span>
                 </button>
               )}
             </div>
 
             {submitError && <p className={styles.error}>{submitError}</p>}
-            {loading && <p>Cargando tests...</p>}
+            {loading && <p className={styles.loadingText}>Loading your questionnaires...</p>}
             {error && <p className={styles.error}>Error: {error}</p>}
             {!loading && !error && tests && tests.length > 0 && (
               <TestCardList tests={tests} onEmojiChange={handleEmojiChange} />
@@ -123,27 +133,27 @@ const Home: React.FC = () => {
             {!loading && !error && tests && tests.length === 0 && (
               <div className={styles.emptyState}>
                 <div className={styles.emptyStateIcon}>📚</div>
-                <h3 className={styles.emptyStateTitle}>No tienes tests todavía</h3>
+                <h3 className={styles.emptyStateTitle}>No Questionnaires Yet</h3>
                 <p className={styles.emptyStateDescription}>
-                  Comienza tu viaje de aprendizaje creando tu primer cuestionario.
-                  ¡Es fácil y rápido!
+                  Start your learning journey by creating your first questionnaire. 
+                  It's quick, easy, and completely customizable to fit your needs.
                 </p>
                 <button className={styles.emptyStateButton} onClick={handleAddQuestion}>
                   <span className={styles.buttonIcon}>✨</span>
-                  Crear mi primer test
+                  Create My First Quiz
                 </button>
                 <div className={styles.emptyStateFooter}>
                   <div className={styles.featureItem}>
                     <span className={styles.featureIcon}>⚡</span>
-                    <span>Fácil de crear</span>
+                    <span>Quick Setup</span>
                   </div>
                   <div className={styles.featureItem}>
                     <span className={styles.featureIcon}>🎯</span>
-                    <span>Personalizable</span>
+                    <span>Customizable</span>
                   </div>
                   <div className={styles.featureItem}>
                     <span className={styles.featureIcon}>📊</span>
-                    <span>Resultados al instante</span>
+                    <span>Instant Results</span>
                   </div>
                 </div>
               </div>
@@ -151,8 +161,8 @@ const Home: React.FC = () => {
           </div>
         ) : (
           <div className={styles.loginPrompt}>
-            <h2>Sign in to access all features</h2>
-            <p>Click the login button in the toolbar.</p>
+            <h2>Welcome to QuestionFlow</h2>
+            <p>Sign in to create and manage your questionnaires, track your progress, and unlock all features.</p>
           </div>
         )}
       </main>

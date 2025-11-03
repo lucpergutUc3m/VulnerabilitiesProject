@@ -4,7 +4,8 @@ import authService from '../services/authService';
 import { config } from '@env';
 import type { User } from '../types/auth';
 import styles from '../css/userProfile.module.css';
-import { TestCardList } from '../components/testCard';
+import TestCardListAdmin from '@/components/testCardAdmin';
+import { FaHome, FaUserShield, FaUserLock, FaUser, FaClipboardList, FaFileAlt } from 'react-icons/fa';
 
 interface TestItem {
   id: number;
@@ -25,18 +26,23 @@ const UserProfile: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState('');
   const [adminTests, setAdminTests] = useState<TestItem[]>([]);
+  const [userTests, setUserTests] = useState<TestItem[]>([]);
   const [testsLoading, setTestsLoading] = useState(false);
 
   useEffect(() => {
     const loadUser = () => {
       const user = authService.getUser();
       
+      console.log('🔍 Loading user:', user);
+      
       if (!user) {
+        console.error('❌ No user found, redirecting to login');
         setError('No user session found');
         navigate('/login', { replace: true });
         return;
       }
 
+      console.log('✅ User loaded successfully:', user.email, 'Role:', user.role);
       setUser(user);
       setEditedName(user.name);
       setIsLoading(false);
@@ -45,27 +51,34 @@ const UserProfile: React.FC = () => {
     loadUser();
   }, [navigate]);
 
-  // Segundo useEffect solo para cargar tests de admin
+  // Segundo useEffect para cargar tests (admin o usuario)
   useEffect(() => {
-    const fetchTestAdmin = async () => {
-      if (!user || !authService.isAdmin()) {
-        return; // Solo si es admin
+    const fetchTests = async () => {
+      if (!user) {
+        return;
       }
 
       setTestsLoading(true);
       try {
-        // Debug: Show token info
-        const payload = authService.getTokenPayload();
-        if (payload) {
-          console.log('Token payload:', payload);
-          console.log('Token authorities:', payload.authorities);
-          console.log('Token role:', payload.role);
-        }
-
-        // Get auth header
         const authHeader = authService.getAuthHeader();
+        let endpoint = '';
         
-        const response = await fetch(`${config.api.baseUrl}/admin/tests`, {
+        // Si es admin, usar endpoint de admin
+        if (authService.isAdmin()) {
+          const payload = authService.getTokenPayload();
+          if (payload) {
+            console.log('Token payload:', payload);
+            console.log('Token authorities:', payload.authorities);
+            console.log('Token role:', payload.role);
+          }
+          
+          endpoint = `${config.api.baseUrl}/admin/tests`;
+        } else {
+          // Si es usuario normal, obtener sus tests
+          endpoint = `${config.api.baseUrl}/tests/user/${user.id}`;
+        }
+        
+        const response = await fetch(endpoint, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -73,28 +86,78 @@ const UserProfile: React.FC = () => {
           }
         });
         
-        console.log('Admin tests response status:', response.status, response.statusText);
+        console.log('Tests response status:', response.status, response.statusText);
         
         if (!response.ok) {
           const errorText = await response.text();
           console.error(`Error ${response.status}: ${response.statusText}`, errorText);
-          setError(`Failed to fetch admin tests: ${response.status} ${response.statusText}`);
+          // No establecer error general, solo log
+          console.warn('Could not load tests, but continuing...');
+          if (authService.isAdmin()) {
+            setAdminTests([]);
+          } else {
+            setUserTests([]);
+          }
           return;
         }
 
         const data = await response.json();
-        console.log('Admin tests data:', data);
-        setAdminTests(data);
+        console.log('Tests data:', data);
+        
+        if (authService.isAdmin()) {
+          setAdminTests(data);
+        } else {
+          setUserTests(data);
+        }
       } catch (e) {
         console.error('Failed to fetch tests:', e);
-        setError('Unable to fetch admin tests');
+        // No establecer error general, solo establecer array vacío
+        if (authService.isAdmin()) {
+          setAdminTests([]);
+        } else {
+          setUserTests([]);
+        }
       } finally {
         setTestsLoading(false);
       }
     };
 
-    fetchTestAdmin();
+    fetchTests();
   }, [user]); // Se ejecuta cuando user cambia
+
+  const handleTestDeleted = () => {
+    // Recargar la lista de tests después de que uno se borre
+    if (!user) return;
+    
+    const authHeader = authService.getAuthHeader();
+    let endpoint = '';
+    
+    if (authService.isAdmin()) {
+      endpoint = `${config.api.baseUrl}/admin/tests`;
+    } else {
+      endpoint = `${config.api.baseUrl}/tests/user/${user.id}`;
+    }
+    
+    fetch(endpoint, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Tests reloaded after deletion:', data);
+        if (authService.isAdmin()) {
+          setAdminTests(data);
+        } else {
+          setUserTests(data);
+        }
+      })
+      .catch(e => {
+        console.error('Failed to reload tests:', e);
+      });
+  };
 
   const handleLogout = async () => {
     await authService.logout();
@@ -114,7 +177,7 @@ const UserProfile: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`${config.api.baseUrl}/auth/profile`, {
+      const response = await fetch(`${config.api.baseUrl}/users/me`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -144,6 +207,7 @@ const UserProfile: React.FC = () => {
   };
 
   if (isLoading) {
+    console.log('⏳ Profile is loading...');
     return (
       <div className={styles.userProfilePage}>
         <div className={styles.background}>
@@ -160,6 +224,8 @@ const UserProfile: React.FC = () => {
       </div>
     );
   }
+
+  console.log('✅ Rendering profile for user:', user?.email, 'Role:', user?.role);
 
   return (
     <div className={styles.userProfilePage}>
@@ -201,6 +267,12 @@ const UserProfile: React.FC = () => {
                   </>
                 ) : (
                   <>
+                    <button
+                      onClick={() => navigate('/')}
+                      className={`${styles.button} ${styles.buttonSmall} ${styles.buttonHome}`}
+                    >
+                      <FaHome /> Home
+                    </button>
                     <button
                       onClick={() => setIsEditing(true)}
                       className={`${styles.button} ${styles.buttonSmall} ${styles.buttonPrimary}`}
@@ -276,7 +348,13 @@ const UserProfile: React.FC = () => {
                     Role
                   </label>
                   <p className={styles.text}>
-                    {user.role === 1 ? '👨‍💼 Admin' : user.role === 2 ? '🔐 Superuser' : '👤 User'}
+                    {user.role === 1 ? (
+                      <><FaUserShield style={{ marginRight: '0.5rem' }} /> Admin</>
+                    ) : user.role === 2 ? (
+                      <><FaUserLock style={{ marginRight: '0.5rem' }} /> Superuser</>
+                    ) : (
+                      <><FaUser style={{ marginRight: '0.5rem' }} /> User</>
+                    )}
                   </p>
                 </div>
               </div>
@@ -286,21 +364,49 @@ const UserProfile: React.FC = () => {
           {/* Admin Tests Section - Only show for admins */}
           {user && user.role === 1 && (
             <div className={styles.profileSection}>
-              <h2 className={styles.sectionTitle}>📋 Admin Tests</h2>
+              <h2 className={styles.sectionTitle}>
+                <FaClipboardList style={{ marginRight: '0.5rem' }} /> Admin Tests
+              </h2>
               
               {testsLoading ? (
                 <p className={styles.loadingMessage}>Loading tests...</p>
               ) : adminTests.length > 0 ? (
-                <TestCardList 
+                <TestCardListAdmin 
                   tests={adminTests.map(test => ({
                     ...test,
                     emoji: test.emoji || '📚',
                     questions: test.questions || (test.questionsJson ? JSON.parse(test.questionsJson) : [])
                   }))} 
-                  onEmojiChange={() => {}} 
+                  onEmojiChange={() => {}}
+                  onTestDeleted={handleTestDeleted}
                 />
               ) : (
                 <p className={styles.noTests}>No tests available</p>
+              )}
+            </div>
+          )}
+
+          {/* User Tests Section - Only show for non-admin users */}
+          {user && user.role !== 1 && (
+            <div className={styles.profileSection}>
+              <h2 className={styles.sectionTitle}>
+                <FaFileAlt style={{ marginRight: '0.5rem' }} /> My Tests
+              </h2>
+              
+              {testsLoading ? (
+                <p className={styles.loadingMessage}>Loading tests...</p>
+              ) : userTests.length > 0 ? (
+                <TestCardListAdmin 
+                  tests={userTests.map(test => ({
+                    ...test,
+                    emoji: test.emoji || '📚',
+                    questions: test.questions || (test.questionsJson ? JSON.parse(test.questionsJson) : [])
+                  }))} 
+                  onEmojiChange={() => {}}
+                  onTestDeleted={handleTestDeleted}
+                />
+              ) : (
+                <p className={styles.noTests}>You haven't created any tests yet</p>
               )}
             </div>
           )}

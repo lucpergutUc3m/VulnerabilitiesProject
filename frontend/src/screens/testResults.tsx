@@ -93,7 +93,6 @@ const TestResults = () => {
             <div className={`${styles.testCard} ${styles.resultsCard}`}>
                 {/* Emoji y estado */}
                 <div className={styles.resultsHeader}>
-
                     <div>
                         <h2 className={styles.testTitleResults}>{test.title}</h2>
                         <p className={styles.testDescriptionResults}>{baremo.message}</p>
@@ -102,7 +101,7 @@ const TestResults = () => {
 
                 {/* Información del test */}
                 <div className={styles.testInfoResults}>
-                    <div style={{display:'flex', flexDirection:'row', alignItems:'center',gap:'1rem'}}>
+                    <div className={styles.resultStatusContainer}>
                         <div className={styles.resultEmoji}>{baremo.emoji}</div>
                         <h1 className={styles.resultStatus}>{baremo.status}</h1>
                     </div>
@@ -116,9 +115,6 @@ const TestResults = () => {
                         </div>
                     </div>
                 </div>
-
-                {/* Score principal - Grande y prominente */}
-
 
                 {/* Detalles */}
                 <div className={styles.detailsContainer}>
@@ -146,6 +142,7 @@ const TestResults = () => {
                         }}
                     ></div>
                 </div>
+
                 {/* Botones de acción */}
                 <div className={styles.resultsActions}>
                     <button
@@ -162,6 +159,7 @@ const TestResults = () => {
                         Ir al inicio
                     </button>
                 </div>
+
                 {/* Recomendación */}
                 <div className={styles.recommendationBox} style={{ borderLeftColor: baremo.color }}>
                     <h3 className={styles.recommendationTitle}>Recomendación</h3>
@@ -233,8 +231,6 @@ const TestResults = () => {
                         </div>
                     </div>
                 )}
-
-
             </div>
         </div>
     );

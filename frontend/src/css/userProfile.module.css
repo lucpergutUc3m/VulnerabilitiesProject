@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   position: relative;
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -23,6 +23,7 @@
   left: 0;
   z-index: 1;
   pointer-events: none;
+  display: none; /* Ocultar las formas para un fondo limpio */
 }
 
 .shape {
@@ -88,26 +89,28 @@
   flex-direction: column;
   flex: 1;
   padding: 0 40px 40px 40px;
-  min-height: 0;
+  min-height: 200px;
 }
 
 /* Custom scrollbar */
 .scrollableContent::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 .scrollableContent::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f1f5f9;
+  border-radius: 6px;
 }
 
 .scrollableContent::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
   border-radius: 6px;
+  border: 2px solid #f1f5f9;
   transition: all 0.3s ease;
 }
 
 .scrollableContent::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #5568d3 0%, #6a3e8f 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #db2777 100%);
 }
 
 @keyframes slideUp {
@@ -123,19 +126,19 @@
 
 /* Header */
 .header {
-  padding: 30px 38px;
-  margin-bottom: 32px;
+  padding: 20px 28px;
+  margin-bottom: 16px;
   border-bottom: 2px solid #e5e7eb;
   flex-shrink: 0;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.04) 0%, rgba(118, 75, 162, 0.04) 100%);
+  background: transparent;
 }
 
 .headerContent {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   flex-wrap: wrap;
   align-items: center;
-  gap: 43rem;
+  gap: 1rem;
 }
 
 .headerButtons {
@@ -145,19 +148,19 @@
 }
 
 .title {
-  font-size: 32px;
+  font-size: 24px;
   font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 0 0 8px 0;
+  margin: 0 0 2px 0;
   letter-spacing: -0.5px;
   line-height: 1.2;
 }
 
 .subtitle {
-  font-size: 13px;
+  font-size: 11px;
   color: #9ca3af;
   margin: 0;
   font-weight: 400;
@@ -191,7 +194,7 @@
 /* Loading Message */
 .loadingMessage {
   text-align: center;
-  color: #667eea;
+  color: #8b5cf6;
   font-size: 16px;
   font-weight: 500;
   padding: 40px;
@@ -205,14 +208,14 @@
 /* Info Box */
 .infoBox {
   background: #f9fafb;
-  padding: 20px 24px;
+  padding: 12px 14px;
   border-radius: 6px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   border: 1px solid #e5e7eb;
   transition: all 0.3s ease;
   display: flex;
   flex-wrap: wrap;
-  gap: 24px;
+  gap: 16px;
   align-items: flex-start;
 }
 
@@ -238,8 +241,9 @@
 .infoField {
   flex: 0 1 calc(50% - 12px);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: flex-start;
+  gap:1rem;
   justify-content: flex-start;
 }
 
@@ -254,21 +258,21 @@
 /* Labels */
 .label {
   display: block;
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 700;
-  color: #667eea;
+  color: #8b5cf6;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  margin-bottom: 3px;
+  margin-bottom: 1px;
 }
 
 /* Input */
 .input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 6px 8px;
   border: 1.5px solid #e5e7eb;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 12px;
   font-family: inherit;
   transition: all 0.3s ease;
   box-sizing: border-box;
@@ -278,9 +282,9 @@
 
 .input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #8b5cf6;
   background: white;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
 .input::placeholder {
@@ -290,20 +294,26 @@
 /* Text */
 .text {
   margin: 0;
-  font-size: 13px;
+  font-size: 11px;
   color: #1f2937;
   font-weight: 500;
   line-height: 1.3;
+  display: flex;
+  align-items: center;
+}
+
+.text svg {
+  color: #8b5cf6;
 }
 
 .textSmall {
   margin: 0;
-  font-size: 11px;
+  font-size: 9px;
   color: #6b7280;
   font-family: 'Courier New', monospace;
   word-break: break-all;
   background: #f3f4f6;
-  padding: 4px 8px;
+  padding: 2px 5px;
   border-radius: 4px;
   border: 1px solid #e5e7eb;
 }
@@ -336,8 +346,8 @@
 }
 
 .buttonSmall {
-  padding: 10px 18px;
-  font-size: 13px;
+  padding: 7px 14px;
+  font-size: 11px;
   font-weight: 600;
   width: auto;
   white-space: nowrap;
@@ -363,13 +373,14 @@
 
 /* Primary Button */
 .buttonPrimary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
 }
 
 .buttonPrimary:hover {
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+  background: linear-gradient(135deg, #7c3aed 0%, #db2777 100%);
 }
 
 /* Secondary Button */
@@ -396,6 +407,29 @@
 .buttonLogout:hover {
   box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
   transform: translateY(-2px);
+}
+
+/* Home Button */
+.buttonHome {
+  background: white;
+  color: #64748b;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-content: center;
+}
+
+.buttonHome svg {
+  font-size: 1rem;
+}
+
+.buttonHome:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #475569;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 /* Responsive */
@@ -445,13 +479,19 @@
 
 /* Admin Tests Section */
 .sectionTitle {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 700;
   color: #1f2937;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   text-transform: capitalize;
+  display: flex;
+  align-items: center;
+}
+
+.sectionTitle svg {
+  color: #8b5cf6;
 }
 
 .testsList {
@@ -507,7 +547,7 @@
 .testTopic {
   font-size: 13px;
   margin: 6px 0;
-  color: #667eea;
+  color: #8b5cf6;
   font-weight: 500;
 }
 

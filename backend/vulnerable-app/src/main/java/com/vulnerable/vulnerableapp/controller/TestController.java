@@ -30,6 +30,11 @@ public class TestController {
         return ResponseEntity.ok(Map.of("message", "Test deleted successfully"));
     }
     
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<TestResponse>> getTestsByUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(testService.getTestsByUserId(userId));
+    }
+    
     @GetMapping("/{testId}")
     public ResponseEntity<TestResponse> getTest(@PathVariable Long testId) {
         return ResponseEntity.ok(testService.getTest(testId));
