@@ -20,7 +20,10 @@ if errorlevel 1 (
 )
 
 echo [1/3] Starting PostgreSQL and Adminer...
+REM Navigate to devdoc folder where compose.yaml is located
+pushd %~dp0
 docker compose --profile dev up -d
+popd
 if errorlevel 1 (
     echo [ERROR] Failed to start Docker containers!
     pause
@@ -45,8 +48,8 @@ echo Backend: http://localhost:8080
 echo ========================================
 echo.
 
-REM Set the profile to 'docker-dev'
-set SPRING_PROFILES_ACTIVE=docker-dev
+REM Set the profile to 'docker-dev' with seeders enabled
+set SPRING_PROFILES_ACTIVE=docker-dev,seeder
 
 REM Change to project root directory
 cd /d "%~dp0\.."

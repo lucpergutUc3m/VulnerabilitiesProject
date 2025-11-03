@@ -5,8 +5,8 @@ REM Uses H2 file database with web console
 REM ========================================
 
 echo.
-echo ========================================
-echo Starting Backend in LOCAL mode
+echo [3/3] Starting Spring Boot backend...
+echo.
 echo ========================================
 echo Database: H2 (file-based)
 echo GUI: H2 Console at http://localhost:8080/h2-console
@@ -23,8 +23,8 @@ echo "jdbc:h2:~/test" with the JDBC URL shown above!
 echo ========================================
 echo.
 
-REM Set the profile to 'local'
-set SPRING_PROFILES_ACTIVE=local
+REM Set the profile to 'local' with seeders enabled
+set SPRING_PROFILES_ACTIVE=local,seeder
 
 REM Change to project root directory
 cd /d "%~dp0\.."
