@@ -1,0 +1,24 @@
+[
+  {
+    "question": "¿Cuál es la capital de Francia?",
+    "options": [
+      "Londres",
+      "París",
+      "Berlín",
+      "Madrid"
+    ],
+    "correctAnswer": 1,
+    "explanation": "París es la capital de Francia desde el siglo XII."
+  },
+  {
+    "question": "¿Cuántos planetas hay en el sistema solar?",
+    "options": [
+      "7",
+      "8",
+      "9",
+      "10"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Hay 8 planetas desde que Plutón fue reclasificado como planeta enano."
+  }
+]

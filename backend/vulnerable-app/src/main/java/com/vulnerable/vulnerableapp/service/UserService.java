@@ -52,11 +52,13 @@ public class UserService {
     public UserResponse updateCurrentUser(UpdateUserRequest request) {
         AppUser user = getCurrentAuthenticatedUser();
         
-        if (request.getName() != null) {
+        System.out.println("Updating user: " + user);
+        
+        if (request.getName() != null && !request.getName().isBlank()) {
             user.setName(request.getName());
         }
         
-        if (request.getOldPassword() != null && request.getNewPassword() != null) {
+        if (request.getOldPassword() != null && request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
             // Verify old password
             if (!passwordEncoder.matches(request.getOldPassword(), user.getPasswordHash())) {
                 throw new RuntimeException("Old password is incorrect");
@@ -73,11 +75,11 @@ public class UserService {
         AppUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
-        if (request.getName() != null) {
+        if (request.getName() != null && !request.getName().isBlank()) {
             user.setName(request.getName());
         }
         
-        if (request.getPassword() != null) {
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
             user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         }
         

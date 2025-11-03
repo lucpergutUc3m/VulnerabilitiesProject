@@ -106,10 +106,6 @@ const CreateTestModal: React.FC<CreateTestModalProps> = ({ isOpen, onClose, onSu
       setError('El tema es obligatorio');
       return false;
     }
-    if (!createdBy.trim()) {
-      setError('El creador es obligatorio');
-      return false;
-    }
     if (questions.length === 0) {
       setError('Debes subir un archivo con las preguntas');
       return false;
@@ -261,22 +257,6 @@ const CreateTestModal: React.FC<CreateTestModalProps> = ({ isOpen, onClose, onSu
                   className={styles.input}
                   min={1}
                   max={180}
-                  disabled={isSubmitting}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label htmlFor="createdBy" className={styles.label}>
-                  Creado por *
-                </label>
-                <input
-                  type="text"
-                  id="createdBy"
-                  value={createdBy}
-                  onChange={e => setCreatedBy(e.target.value)}
-                  className={styles.input}
-                  placeholder="Tu nombre"
-                  required
                   disabled={isSubmitting}
                 />
               </div>

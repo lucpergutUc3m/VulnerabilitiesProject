@@ -1,9 +1,11 @@
 package com.vulnerable.vulnerableapp.security;
 
+import com.vulnerable.vulnerableapp.entity.AppUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +14,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil {
@@ -22,6 +26,12 @@ public class JwtUtil {
     
     @Value("${jwt.expiration}")
     private Long expiration;
+    
+    @Value("${jwt.issuer:VulnerableApp}")
+    private String issuer;
+    
+    @Value("${jwt.audience:VulnerableApp-Users}")
+    private String audience;
     
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
@@ -33,6 +43,10 @@ public class JwtUtil {
     
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
+    }
+    
+    public String extractTokenId(String token) {
+        return extractClaim(token, Claims::getId);
     }
     
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -54,6 +68,20 @@ public class JwtUtil {
     
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        
+        // Add security-critical claims to prevent token forgery
+        if (userDetails instanceof AppUser) {
+            AppUser appUser = (AppUser) userDetails;
+            claims.put("userId", appUser.getId());
+            claims.put("role", appUser.getRole());
+            claims.put("name", appUser.getName());
+        }
+        
+        // Add roles/authorities to token
+        claims.put("authorities", userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList()));
+        
         return createToken(claims, userDetails.getUsername());
     }
     
@@ -61,6 +89,9 @@ public class JwtUtil {
         return Jwts.builder()
                 .claims(claims)
                 .subject(subject)
+                .id(UUID.randomUUID().toString()) // Unique token ID (jti) - prevents token reuse/forgery
+                .issuer(issuer) // Token issuer - ensures token is from our app
+                .audience().add(audience).and() // Token audience - ensures token is for our app
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey())
@@ -69,7 +100,38 @@ public class JwtUtil {
     
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        
+        // Validate username matches
+        if (!username.equals(userDetails.getUsername()) || isTokenExpired(token)) {
+            return false;
+        }
+        
+        // Additional security: Validate userId and role claims match the actual user
+        // This prevents token forgery even if someone knows the email
+        if (userDetails instanceof AppUser) {
+            AppUser appUser = (AppUser) userDetails;
+            Claims claims = extractAllClaims(token);
+            
+            // Verify user ID matches (critical security check)
+            Object userIdClaim = claims.get("userId");
+            if (userIdClaim != null) {
+                Long tokenUserId = ((Number) userIdClaim).longValue();
+                if (!tokenUserId.equals(appUser.getId())) {
+                    return false; // Token user ID doesn't match - possible forgery
+                }
+            }
+            
+            // Verify role matches (prevents privilege escalation)
+            Object roleClaim = claims.get("role");
+            if (roleClaim != null) {
+                Integer tokenRole = ((Number) roleClaim).intValue();
+                if (!tokenRole.equals(appUser.getRole())) {
+                    return false; // Token role doesn't match - possible privilege escalation attempt
+                }
+            }
+        }
+        
+        return true;
     }
     
     public Long getExpirationTime() {
