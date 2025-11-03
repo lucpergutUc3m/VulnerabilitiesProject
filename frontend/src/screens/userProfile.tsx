@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import authService from '../services/authService';
 import { config } from '@env';
 import type { User } from '../types/auth';
 import logoImg from '../assets/images/logo.svg';
@@ -25,24 +26,17 @@ const UserProfile: React.FC = () => {
 
   useEffect(() => {
     const loadUser = () => {
-      const userStr = localStorage.getItem('user');
-      const token = localStorage.getItem('authToken');
-
-      if (!userStr || !token) {
+      const user = authService.getUser();
+      
+      if (!user) {
         setError('No user session found');
         navigate('/login', { replace: true });
         return;
       }
 
-      try {
-        const userData = JSON.parse(userStr);
-        setUser(userData);
-        setEditedName(userData.name);
-        setIsLoading(false);
-      } catch {
-        setError('Failed to load user data');
-        setIsLoading(false);
-      }
+      setUser(user);
+      setEditedName(user.name);
+      setIsLoading(false);
     };
 
     loadUser();
@@ -51,28 +45,37 @@ const UserProfile: React.FC = () => {
   // Segundo useEffect solo para cargar tests de admin
   useEffect(() => {
     const fetchTestAdmin = async () => {
-      if (!user || user.role !== 1) {
-        return; // Solo si es admin (role === 1)
+      if (!user || !authService.isAdmin()) {
+        return; // Solo si es admin
       }
 
       setTestsLoading(true);
       try {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-          console.warn('No authentication token found');
-          return;
+        // Debug: Show token info
+        const payload = authService.getTokenPayload();
+        if (payload) {
+          console.log('Token payload:', payload);
+          console.log('Token authorities:', payload.authorities);
+          console.log('Token role:', payload.role);
         }
 
+        // Get auth header
+        const authHeader = authService.getAuthHeader();
+        
         const response = await fetch(`${config.api.baseUrl}/admin/tests`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            ...authHeader
           }
         });
         
+        console.log('Admin tests response status:', response.status, response.statusText);
+        
         if (!response.ok) {
-          console.error(`Error ${response.status}: ${response.statusText}`);
+          const errorText = await response.text();
+          console.error(`Error ${response.status}: ${response.statusText}`, errorText);
+          setError(`Failed to fetch admin tests: ${response.status} ${response.statusText}`);
           return;
         }
 
@@ -90,9 +93,8 @@ const UserProfile: React.FC = () => {
     fetchTestAdmin();
   }, [user]); // Se ejecuta cuando user cambia
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
+  const handleLogout = async () => {
+    await authService.logout();
     navigate('/login', { replace: true });
   };
 
@@ -103,7 +105,7 @@ const UserProfile: React.FC = () => {
     }
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = authService.getToken();
       if (!token) {
         setError('No authentication token found');
         return;
@@ -124,8 +126,9 @@ const UserProfile: React.FC = () => {
       }
 
       const updatedUser = { ...user, name: editedName };
-      setUser(updatedUser);
+      // Update localStorage
       localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
       setIsEditing(false);
       setError('');
     } catch (e) {

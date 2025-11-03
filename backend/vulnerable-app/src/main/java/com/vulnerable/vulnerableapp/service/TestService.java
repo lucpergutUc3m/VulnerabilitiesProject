@@ -94,7 +94,15 @@ public class TestService {
     
     public List<TestResponse> getAllTests() {
         // Admin only - returns all tests
-        return testRepository.findAll().stream()
+        List<TestEntity> allTests = testRepository.findAll();
+        log.info("🔍 getAllTests() - Found {} tests in database", allTests.size());
+        if (allTests.isEmpty()) {
+            log.warn("⚠️ getAllTests() - Database returned empty list!");
+        } else {
+            allTests.forEach(test -> log.debug("  - Test ID: {}, Title: {}, Owner: {}", 
+                test.getId(), test.getTitle(), test.getOwner().getEmail()));
+        }
+        return allTests.stream()
                 .map(testMapper::toTestResponse)
                 .collect(Collectors.toList());
     }
