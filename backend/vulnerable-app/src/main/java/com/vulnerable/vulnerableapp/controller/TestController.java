@@ -4,6 +4,7 @@ import com.vulnerable.vulnerableapp.dto.tests.TestRequest;
 import com.vulnerable.vulnerableapp.dto.tests.TestResponse;
 import com.vulnerable.vulnerableapp.dto.tests.UpdateTestRequest;
 import com.vulnerable.vulnerableapp.service.TestService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TestController {
     
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Spring-managed singleton bean injected via constructor")
     private final TestService testService;
     
     @PostMapping

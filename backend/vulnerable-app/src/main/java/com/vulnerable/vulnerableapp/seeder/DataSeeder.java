@@ -143,7 +143,7 @@ public class DataSeeder {
                     .description("Test sobre conceptos fundamentales de Java")
                     .questionsJson(mapper.writeValueAsString(questions1))
                     .timeLimitMinutes(30)
-                    .owner(admin)
+                    .ownerId(admin.getId())
                     .isPublic(true)
                     .build());
         } catch (Exception e) {
@@ -192,7 +192,7 @@ public class DataSeeder {
                     .description("Conceptos básicos de seguridad web")
                     .questionsJson(mapper.writeValueAsString(questions2))
                     .timeLimitMinutes(25)
-                    .owner(john)
+                    .ownerId(john.getId())
                     .isPublic(true)
                     .build());
         } catch (Exception e) {
@@ -236,7 +236,7 @@ public class DataSeeder {
                     .description("Introducción a consultas SQL")
                     .questionsJson(mapper.writeValueAsString(questions3))
                     .timeLimitMinutes(20)
-                    .owner(jane)
+                    .ownerId(jane.getId())
                     .isPublic(true)
                     .build());
         } catch (Exception e) {
@@ -270,7 +270,7 @@ public class DataSeeder {
                     .description("Conceptos avanzados de Spring Boot (Privado)")
                     .questionsJson(mapper.writeValueAsString(questions4))
                     .timeLimitMinutes(45)
-                    .owner(admin)
+                    .ownerId(admin.getId())
                     .isPublic(false)
                     .build());
         } catch (Exception e) {
@@ -309,7 +309,7 @@ public class DataSeeder {
                     .description("Conceptos de desarrollo de APIs REST")
                     .questionsJson(mapper.writeValueAsString(questions5))
                     .timeLimitMinutes(30)
-                    .owner(john)
+                    .ownerId(john.getId())
                     .isPublic(true)
                     .build());
         } catch (Exception e) {

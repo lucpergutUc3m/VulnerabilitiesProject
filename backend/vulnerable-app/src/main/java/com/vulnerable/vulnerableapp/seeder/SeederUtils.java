@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vulnerable.vulnerableapp.entity.AppUser;
 import com.vulnerable.vulnerableapp.entity.TestEntity;
 import com.vulnerable.vulnerableapp.utils.UserRoles;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -56,7 +57,7 @@ public class SeederUtils {
                     .description(description)
                     .questionsJson(questionsJson)
                     .timeLimitMinutes(timeLimitMinutes)
-                    .owner(owner)
+                    .ownerId(owner.getId())
                     .isPublic(isPublic)
                     .build();
         } catch (Exception e) {
@@ -70,6 +71,7 @@ public class SeederUtils {
      */
     public static class Question {
         private String question;
+        @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Internal seeder utility class - list contains only immutable Strings")
         private List<String> options;
         private Integer correctAnswer;
 
@@ -80,6 +82,7 @@ public class SeederUtils {
         }
 
         public String getQuestion() { return question; }
+        @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Internal seeder utility class - list contains only immutable Strings")
         public List<String> getOptions() { return options; }
         public Integer getCorrectAnswer() { return correctAnswer; }
     }

@@ -53,7 +53,7 @@ public class TestService {
         TestEntity test = testRepository.findById(testId)
                 .orElseThrow(() -> new RuntimeException("Test not found"));
         
-        if (!test.getOwner().getId().equals(user.getId())) {
+        if (!test.getOwnerId().equals(user.getId())) {
             throw new RuntimeException("You don't have permission to delete this test");
         }
         
@@ -74,7 +74,7 @@ public class TestService {
                 .orElseThrow(() -> new RuntimeException("Test not found"));
         
         // Check if user has access (owner or public test)
-        boolean hasAccess = test.getOwner().getId().equals(user.getId()) || test.getIsPublic();
+        boolean hasAccess = test.getOwnerId().equals(user.getId()) || test.getIsPublic();
         
         if (!hasAccess) {
             throw new RuntimeException("You don't have permission to view this test");
@@ -87,7 +87,7 @@ public class TestService {
         AppUser user = getCurrentAuthenticatedUser();
         
         // Returns all public tests + user's own tests
-        return testRepository.findAccessibleByUser(user).stream()
+        return testRepository.findAccessibleByUserId(user.getId()).stream()
                 .map(testMapper::toTestResponse)
                 .collect(Collectors.toList());
     }
@@ -106,7 +106,7 @@ public class TestService {
         TestEntity test = testRepository.findById(testId)
                 .orElseThrow(() -> new RuntimeException("Test not found"));
         
-        if (!test.getOwner().getId().equals(user.getId())) {
+        if (!test.getOwnerId().equals(user.getId())) {
             throw new RuntimeException("You don't have permission to update this test");
         }
         

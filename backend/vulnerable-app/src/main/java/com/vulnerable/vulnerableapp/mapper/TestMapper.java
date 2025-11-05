@@ -7,10 +7,12 @@ import com.vulnerable.vulnerableapp.dto.tests.TestRequest;
 import com.vulnerable.vulnerableapp.dto.tests.TestResponse;
 import com.vulnerable.vulnerableapp.entity.AppUser;
 import com.vulnerable.vulnerableapp.entity.TestEntity;
+import com.vulnerable.vulnerableapp.repository.AppUserRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,10 @@ import java.util.List;
  * MapStruct mapper for converting between TestEntity and DTOs
  */
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface TestMapper {
+public abstract class TestMapper {
+    
+    @Autowired
+    protected AppUserRepository appUserRepository;
     
     /**
      * Convert TestRequest DTO to TestEntity
@@ -28,7 +33,7 @@ public interface TestMapper {
      * @return TestEntity
      */
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "owner", source = "owner")
+    @Mapping(target = "ownerId", source = "owner.id")
     @Mapping(target = "title", source = "request.title")
     @Mapping(target = "topic", source = "request.topic")
     @Mapping(target = "emoji", source = "request.emoji")
@@ -36,7 +41,20 @@ public interface TestMapper {
     @Mapping(target = "questionsJson", source = "request.questionsJson")
     @Mapping(target = "timeLimitMinutes", source = "request.timeLimit")
     @Mapping(target = "isPublic", constant = "false")
-    TestEntity toEntity(TestRequest request, AppUser owner);
+    public abstract TestEntity toEntity(TestRequest request, AppUser owner);
+    
+    /**
+     * Convert ownerId to owner's name
+     */
+    @Named("ownerIdToName")
+    protected String ownerIdToName(Long ownerId) {
+        if (ownerId == null) {
+            return "Unknown";
+        }
+        return appUserRepository.findById(ownerId)
+                .map(AppUser::getName)
+                .orElse("Unknown");
+    }
     
     /**
      * Convert TestEntity to TestResponse DTO
@@ -44,15 +62,15 @@ public interface TestMapper {
      * @return TestResponse DTO
      */
     @Mapping(target = "timeLimit", source = "timeLimitMinutes")
-    @Mapping(target = "createdBy", source = "owner.email")
+    @Mapping(target = "createdBy", source = "ownerId", qualifiedByName = "ownerIdToName")
     @Mapping(target = "questions", source = "questionsJson", qualifiedByName = "jsonToQuestions")
-    TestResponse toTestResponse(TestEntity test);
+    public abstract TestResponse toTestResponse(TestEntity test);
     
     /**
      * Parse questionsJson string to List of QuestionResponse
      */
     @Named("jsonToQuestions")
-    default List<QuestionResponse> parseQuestionsJson(String questionsJson) {
+    protected List<QuestionResponse> parseQuestionsJson(String questionsJson) {
         if (questionsJson == null || questionsJson.isEmpty()) {
             return new ArrayList<>();
         }

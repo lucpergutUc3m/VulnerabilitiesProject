@@ -5,6 +5,8 @@ import com.vulnerable.vulnerableapp.entity.TestEntity;
 import com.vulnerable.vulnerableapp.repository.AppUserRepository;
 import com.vulnerable.vulnerableapp.repository.TestEntityRepository;
 import com.vulnerable.vulnerableapp.utils.UserRoles;
+
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -108,36 +110,12 @@ public class SeederService {
                 .description(description)
                 .questionsJson(questionsJson)
                 .timeLimitMinutes(timeLimitMinutes)
-                .owner(owner)
+                .ownerId(owner.getId())
                 .isPublic(isPublic)
                 .build();
         testRepository.save(test);
         log.info("✓ Test creado: {}", title);
         return test;
-    }
-
-    /**
-     * Obtiene estadísticas de la base de datos
-     */
-    public DatabaseStats getStats() {
-        return DatabaseStats.builder()
-                .totalUsers(userRepository.count())
-                .totalTests(testRepository.count())
-                .adminUsers(countAdminUsers())
-                .publicTests(countPublicTests())
-                .build();
-    }
-
-    private long countAdminUsers() {
-        return userRepository.findAll().stream()
-                .filter(u -> u.getRole().equals(UserRoles.ADMIN.getValue()))
-                .count();
-    }
-
-    private long countPublicTests() {
-        return testRepository.findAll().stream()
-                .filter(TestEntity::getIsPublic)
-                .count();
     }
 
     private List<AppUser> createBasicUsers() {
@@ -171,24 +149,14 @@ public class SeederService {
     /**
      * DTO para resultados de seeding
      */
+    @Data
     public static class SeederResult {
-        public boolean success;
-        public String message;
+        private boolean success;
+        private String message;
 
         public SeederResult(boolean success, String message) {
             this.success = success;
             this.message = message;
         }
-    }
-
-    /**
-     * DTO para estadísticas
-     */
-    @lombok.Builder
-    public static class DatabaseStats {
-        public long totalUsers;
-        public long totalTests;
-        public long adminUsers;
-        public long publicTests;
     }
 }

@@ -2,6 +2,7 @@ package com.vulnerable.vulnerableapp.security;
 
 import com.vulnerable.vulnerableapp.entity.BlacklistedToken;
 import com.vulnerable.vulnerableapp.repository.BlacklistedTokenRepository;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,7 +20,9 @@ import java.time.LocalDateTime;
 @Slf4j
 public class TokenBlacklist {
     
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Spring-managed singleton bean injected via constructor")
     private final BlacklistedTokenRepository blacklistedTokenRepository;
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Spring-managed singleton bean injected via constructor")
     private final JwtUtil jwtUtil;
     
     /**

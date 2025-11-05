@@ -3,6 +3,7 @@ package com.vulnerable.vulnerableapp.security;
 import com.vulnerable.vulnerableapp.service.CustomUserDetailsService;
 import com.vulnerable.vulnerableapp.utils.UserRoles;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +33,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Spring-managed singleton bean injected via constructor")
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Spring-managed singleton bean injected via constructor")
     private final CustomUserDetailsService userDetailsService;
     
     @Bean

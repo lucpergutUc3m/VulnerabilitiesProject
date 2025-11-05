@@ -36,9 +36,8 @@ public class TestEntity {
     @Column(name = "time_limit_minutes")
     private Integer timeLimitMinutes;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", nullable = false)
-    private AppUser owner;
+    @Column(name = "owner_id", nullable = false)
+    private Long ownerId;
     
     @Column(name = "public", nullable = false)
     @Builder.Default
