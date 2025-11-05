@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import authService from '../services/authService';
 import { config } from '@env';
 import type { User } from '../types/auth';
-import logoImg from '../assets/images/logo.svg';
 import styles from '../css/userProfile.module.css';
+import TestCardListAdmin from '@/components/testCardAdmin';
+import { FaHome, FaUserShield, FaUserLock, FaUser, FaClipboardList, FaFileAlt } from 'react-icons/fa';
+import { rateLimiter, RATE_LIMITS } from '../utils/rateLimiter';
 
 interface TestItem {
   id: number;
@@ -11,6 +14,9 @@ interface TestItem {
   description: string;
   topic?: string;
   ownerId?: number;
+  emoji?: string;
+  questionsJson?: string;
+  questions?: Record<string, unknown>[];
 }
 
 const UserProfile: React.FC = () => {
@@ -21,78 +27,122 @@ const UserProfile: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState('');
   const [adminTests, setAdminTests] = useState<TestItem[]>([]);
+  const [userTests, setUserTests] = useState<TestItem[]>([]);
   const [testsLoading, setTestsLoading] = useState(false);
 
   useEffect(() => {
     const loadUser = () => {
-      const userStr = localStorage.getItem('user');
-      const token = localStorage.getItem('authToken');
-
-      if (!userStr || !token) {
+      const user = authService.getUser();
+      
+      if (!user) {
         setError('No user session found');
         navigate('/login', { replace: true });
         return;
       }
 
-      try {
-        const userData = JSON.parse(userStr);
-        setUser(userData);
-        setEditedName(userData.name);
-        setIsLoading(false);
-      } catch {
-        setError('Failed to load user data');
-        setIsLoading(false);
-      }
+      setUser(user);
+      setEditedName(user.name);
+      setIsLoading(false);
     };
 
     loadUser();
   }, [navigate]);
 
-  // Segundo useEffect solo para cargar tests de admin
+ 
   useEffect(() => {
-    const fetchTestAdmin = async () => {
-      if (!user || user.role !== 1) {
-        return; // Solo si es admin (role === 1)
+    const fetchTests = async () => {
+      if (!user) {
+        return;
       }
 
       setTestsLoading(true);
       try {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-          console.warn('No authentication token found');
-          return;
+        const authHeader = authService.getAuthHeader();
+        let endpoint = '';
+        
+     
+        if (authService.isAdminUI()) {
+          endpoint = `${config.api.baseUrl}/admin/tests`;
+        } else {
+        
+          endpoint = `${config.api.baseUrl}/tests/user/${user.id}`;
         }
-
-        const response = await fetch(`${config.api.baseUrl}/admin/tests`, {
+        
+        const response = await fetch(endpoint, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            ...authHeader
           }
         });
         
         if (!response.ok) {
-          console.error(`Error ${response.status}: ${response.statusText}`);
+          await response.text();
+          if (authService.isAdminUI()) {
+            setAdminTests([]);
+          } else {
+            setUserTests([]);
+          }
           return;
         }
 
         const data = await response.json();
-        console.log('Admin tests data:', data);
-        setAdminTests(data);
-      } catch (e) {
-        console.error('Failed to fetch tests:', e);
-        setError('Unable to fetch admin tests');
+        
+        if (authService.isAdminUI()) {
+          setAdminTests(data);
+        } else {
+          setUserTests(data);
+        }
+      } catch {
+
+        if (authService.isAdminUI()) {
+          setAdminTests([]);
+        } else {
+          setUserTests([]);
+        }
       } finally {
         setTestsLoading(false);
       }
     };
 
-    fetchTestAdmin();
-  }, [user]); // Se ejecuta cuando user cambia
+    fetchTests();
+  }, [user]); 
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
+  const handleTestDeleted = () => {
+
+    if (!user) return;
+    
+    const authHeader = authService.getAuthHeader();
+    let endpoint = '';
+    
+    if (authService.isAdminUI()) {
+      endpoint = `${config.api.baseUrl}/admin/tests`;
+    } else {
+      endpoint = `${config.api.baseUrl}/tests/user/${user.id}`;
+    }
+    
+    fetch(endpoint, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (authService.isAdminUI()) {
+          setAdminTests(data);
+        } else {
+          setUserTests(data);
+        }
+      })
+      .catch(() => {
+        // Fail silently
+      });
+  };
+
+  const handleLogout = async () => {
+    await authService.logout();
     navigate('/login', { replace: true });
   };
 
@@ -102,14 +152,20 @@ const UserProfile: React.FC = () => {
       return;
     }
 
+    if (!rateLimiter.canProceed('updateProfile', RATE_LIMITS.UPDATE_PROFILE)) {
+      const blockedTime = Math.ceil(rateLimiter.getBlockedTimeRemaining('updateProfile') / 1000);
+      setError(`Too many update attempts. Please try again in ${blockedTime} seconds.`);
+      return;
+    }
+
     try {
-      const token = localStorage.getItem('authToken');
+      const token = authService.getToken();
       if (!token) {
         setError('No authentication token found');
         return;
       }
 
-      const response = await fetch(`${config.api.baseUrl}/auth/profile`, {
+      const response = await fetch(`${config.api.baseUrl}/users/me`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -124,10 +180,12 @@ const UserProfile: React.FC = () => {
       }
 
       const updatedUser = { ...user, name: editedName };
-      setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
       setIsEditing(false);
       setError('');
+      
+      rateLimiter.reset('updateProfile');
     } catch (e) {
       if (e instanceof Error) {
         setError(e.message);
@@ -146,7 +204,9 @@ const UserProfile: React.FC = () => {
         </div>
         <div className={styles.container}>
           <div className={styles.content}>
-            <p className={styles.loadingMessage}>Loading profile...</p>
+            <div className={styles.scrollableContent}>
+              <p className={styles.loadingMessage}>Loading profile...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -164,28 +224,73 @@ const UserProfile: React.FC = () => {
         <div className={styles.content}>
           {/* Header */}
           <div className={styles.header}>
-            <div className={styles.logo}>
-              <img src={logoImg} alt="Logo" />
+            <div className={styles.headerContent}>
+              <div>
+                <h1 className={styles.title}>My Profile</h1>
+                <p className={styles.subtitle}>
+                  Manage your account information
+                </p>
+              </div>
+              <div className={styles.headerButtons}>
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={handleUpdateProfile}
+                      className={`${styles.button} ${styles.buttonSmall} ${styles.buttonPrimary}`}
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsEditing(false);
+                        setEditedName(user?.name || '');
+                        setError('');
+                      }}
+                      className={`${styles.button} ${styles.buttonSmall} ${styles.buttonSecondary}`}
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => navigate('/')}
+                      className={`${styles.button} ${styles.buttonSmall} ${styles.buttonHome}`}
+                    >
+                      <FaHome /> Home
+                    </button>
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className={`${styles.button} ${styles.buttonSmall} ${styles.buttonPrimary}`}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className={`${styles.button} ${styles.buttonSmall} ${styles.buttonLogout}`}
+                    >
+                      Logout
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
-            <h1 className={styles.title}>My Profile</h1>
-            <p className={styles.subtitle}>
-              Manage your account information
-            </p>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className={styles.errorMessage}>
-              {error}
-            </div>
-          )}
+          <div className={styles.scrollableContent}>
+            {/* Error Message */}
+            {error && (
+              <div className={styles.errorMessage}>
+                {error}
+              </div>
+            )}
 
           {/* Profile Information */}
           {user && (
             <div className={styles.profileSection}>
               {/* User Info Display */}
               <div className={styles.infoBox}>
-                <div className={styles.infoBoxWithMargin}>
+                <div className={styles.infoField}>
                   <label className={styles.label}>
                     Name
                   </label>
@@ -203,7 +308,7 @@ const UserProfile: React.FC = () => {
                   )}
                 </div>
 
-                <div>
+                <div className={styles.infoField}>
                   <label className={styles.label}>
                     Email
                   </label>
@@ -213,24 +318,31 @@ const UserProfile: React.FC = () => {
                 </div>
               </div>
 
-              {/* User ID (read-only) */}
+              {/* User ID and Role - Same row */}
               <div className={styles.infoBox}>
-                <label className={styles.label}>
-                  User ID
-                </label>
-                <p className={styles.textSmall}>
-                  {user.id}
-                </p>
-              </div>
+                <div className={styles.infoField}>
+                  <label className={styles.label}>
+                    User ID
+                  </label>
+                  <p className={styles.textSmall}>
+                    {user.id}
+                  </p>
+                </div>
 
-              {/* User Role */}
-              <div className={styles.infoBox}>
-                <label className={styles.label}>
-                  Role
-                </label>
-                <p className={styles.text}>
-                  {user.role === 1 ? '👨‍💼 Admin' : user.role === 2 ? '🔐 Superuser' : '👤 User'}
-                </p>
+                <div className={styles.infoField}>
+                  <label className={styles.label}>
+                    Role
+                  </label>
+                  <p className={styles.text}>
+                    {user.role === 1 ? (
+                      <><FaUserShield style={{ marginRight: '0.5rem' }} /> Admin</>
+                    ) : user.role === 2 ? (
+                      <><FaUserLock style={{ marginRight: '0.5rem' }} /> Superuser</>
+                    ) : (
+                      <><FaUser style={{ marginRight: '0.5rem' }} /> User</>
+                    )}
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -238,69 +350,52 @@ const UserProfile: React.FC = () => {
           {/* Admin Tests Section - Only show for admins */}
           {user && user.role === 1 && (
             <div className={styles.profileSection}>
-              <h2 className={styles.sectionTitle}>📋 Admin Tests</h2>
+              <h2 className={styles.sectionTitle}>
+                <FaClipboardList style={{ marginRight: '0.5rem' }} /> Admin Tests
+              </h2>
               
               {testsLoading ? (
                 <p className={styles.loadingMessage}>Loading tests...</p>
               ) : adminTests.length > 0 ? (
-                <div className={styles.testsList}>
-                  {adminTests.map((test: TestItem) => (
-                    <div key={test.id} className={styles.testCard}>
-                      <div className={styles.testCardHeader}>
-                        <h3 className={styles.testTitle}>{test.title}</h3>
-                        <span className={styles.testId}>ID: {test.id}</span>
-                      </div>
-                      <p className={styles.testDescription}>{test.description}</p>
-                      {test.topic && (
-                        <p className={styles.testTopic}>📚 Topic: {test.topic}</p>
-                      )}
-                      <p className={styles.testOwner}>Owner ID: {test.ownerId}</p>
-                    </div>
-                  ))}
-                </div>
+                <TestCardListAdmin 
+                  tests={adminTests.map(test => ({
+                    ...test,
+                    emoji: test.emoji || '📚',
+                    questions: test.questions || (test.questionsJson ? JSON.parse(test.questionsJson) : [])
+                  }))} 
+                  onEmojiChange={() => {}}
+                  onTestDeleted={handleTestDeleted}
+                />
               ) : (
                 <p className={styles.noTests}>No tests available</p>
               )}
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className={styles.buttonContainer}>
-            {isEditing ? (
-              <>
-                <button
-                  onClick={handleUpdateProfile}
-                  className={`${styles.button} ${styles.buttonPrimary}`}
-                >
-                  Save Changes
-                </button>
-                <button
-                  onClick={() => {
-                    setIsEditing(false);
-                    setEditedName(user?.name || '');
-                    setError('');
-                  }}
-                  className={`${styles.button} ${styles.buttonSecondary}`}
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className={`${styles.button} ${styles.buttonPrimary}`}
-                >
-                  Edit Profile
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className={`${styles.button} ${styles.buttonSecondary}`}
-                >
-                  Logout
-                </button>
-              </>
-            )}
+          {/* User Tests Section - Only show for non-admin users */}
+          {user && user.role !== 1 && (
+            <div className={styles.profileSection}>
+              <h2 className={styles.sectionTitle}>
+                <FaFileAlt style={{ marginRight: '0.5rem' }} /> My Tests
+              </h2>
+              
+              {testsLoading ? (
+                <p className={styles.loadingMessage}>Loading tests...</p>
+              ) : userTests.length > 0 ? (
+                <TestCardListAdmin 
+                  tests={userTests.map(test => ({
+                    ...test,
+                    emoji: test.emoji || '📚',
+                    questions: test.questions || (test.questionsJson ? JSON.parse(test.questionsJson) : [])
+                  }))} 
+                  onEmojiChange={() => {}}
+                  onTestDeleted={handleTestDeleted}
+                />
+              ) : (
+                <p className={styles.noTests}>You haven't created any tests yet</p>
+              )}
+            </div>
+          )}
           </div>
         </div>
       </div>

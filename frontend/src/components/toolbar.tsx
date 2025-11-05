@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styles from '../css/toolbar.module.css';
 import logoImg from '../assets/images/logo.svg';
 import { useNavigate } from 'react-router-dom';
+
 const UserIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -31,6 +32,7 @@ interface ToolbarProps {
 const Toolbar: React.FC<ToolbarProps> = ({ appName, onLoginClick, onLogout, user }) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
+
   const handleUserIconClick = () => {
     if (user) {
       setIsUserMenuOpen(!isUserMenuOpen);
@@ -44,16 +46,22 @@ const Toolbar: React.FC<ToolbarProps> = ({ appName, onLoginClick, onLogout, user
     onLogout();
   };
 
+  const handleViewProfile = () => {
+    setIsUserMenuOpen(false);
+    navigate('/user');
+  };
+
   return (
     <header className={styles.toolbar}>
       <div className={styles.toolbarContent}>
         {/* Logo and app name */}
-        <div className={styles.logoSection}>
+        <div className={styles.brandSection}>
           <div className={styles.logo}>
-            <img src={logoImg} alt="Logo" />
+            <img src={logoImg} alt="QuestionFlow Logo" />
           </div>
+          <h1 className={styles.appName}>{appName}</h1>
         </div>
-        <h1 className={styles.appName}>{appName}</h1>
+
         {/* User section/login */}
         <div className={styles.userSection}>
           {user ? (
@@ -62,6 +70,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ appName, onLoginClick, onLogout, user
                 className={styles.userButton}
                 onClick={handleUserIconClick}
                 aria-label="User menu"
+                aria-expanded={isUserMenuOpen}
               >
                 {user.avatar ? (
                   <img
@@ -82,20 +91,19 @@ const Toolbar: React.FC<ToolbarProps> = ({ appName, onLoginClick, onLogout, user
                   <div className={styles.userInfo}>
                     <p className={styles.userEmail}>{user.email}</p>
                   </div>
-
-
+                  <div className={styles.menuDivider}></div>
                   <button
-                    className={`${styles.menuItem}`}
-                    onClick={()=>navigate('/user')}
+                    className={styles.menuItem}
+                    onClick={handleViewProfile}
                   >
-                    Ver Perfil
+                    View Profile
                   </button>
-
+                  <div className={styles.menuDivider}></div>
                   <button
                     className={`${styles.menuItem} ${styles.logoutItem}`}
                     onClick={handleUserMenuLogout}
                   >
-                    Logout
+                    Sign Out
                   </button>
                 </div>
               )}

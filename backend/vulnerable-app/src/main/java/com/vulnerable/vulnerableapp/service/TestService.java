@@ -92,9 +92,31 @@ public class TestService {
                 .collect(Collectors.toList());
     }
     
+    public List<TestResponse> getTestsByUserId(Long userId) {
+        AppUser currentUser = getCurrentAuthenticatedUser();
+        
+        // Verify that the user is requesting their own tests
+        if (!currentUser.getId().equals(userId)) {
+            throw new RuntimeException("You can only view your own tests");
+        }
+        
+        // Returns all tests created by the user
+        return testRepository.findByOwnerId(userId).stream()
+                .map(testMapper::toTestResponse)
+                .collect(Collectors.toList());
+    }
+    
     public List<TestResponse> getAllTests() {
         // Admin only - returns all tests
-        return testRepository.findAll().stream()
+        List<TestEntity> allTests = testRepository.findAll();
+        log.info("🔍 getAllTests() - Found {} tests in database", allTests.size());
+        if (allTests.isEmpty()) {
+            log.warn("⚠️ getAllTests() - Database returned empty list!");
+        } else {
+            allTests.forEach(test -> log.debug("  - Test ID: {}, Title: {}, Owner: {}", 
+                test.getId(), test.getTitle(), test.getOwner().getEmail()));
+        }
+        return allTests.stream()
                 .map(testMapper::toTestResponse)
                 .collect(Collectors.toList());
     }

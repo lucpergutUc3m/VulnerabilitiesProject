@@ -29,7 +29,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit, isLoading = false
       ...prev,
       [name]: value,
     }));
-    // Clear validation error for this field
     setValidationErrors(prev => ({
       ...prev,
       [name]: undefined,

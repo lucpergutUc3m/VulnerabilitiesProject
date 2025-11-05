@@ -12,6 +12,8 @@ import java.util.List;
 public interface TestEntityRepository extends JpaRepository<TestEntity, Long> {
     List<TestEntity> findByOwnerId(Long ownerId);
     
+    List<TestEntity> findByOwnerId(Long ownerId);
+    
     // Find all public tests or tests owned by the user
     @Query("SELECT t FROM TestEntity t WHERE t.isPublic = true OR t.ownerId = :userId")
     List<TestEntity> findAccessibleByUserId(@Param("userId") Long userId);

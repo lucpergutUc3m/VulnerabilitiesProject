@@ -1,0 +1,153 @@
+/* testCardAdmin.module.css - Estilos específicos para admin */
+
+/* Importar o heredar de tests.card.module.css */
+@import './tests.card.module.css';
+
+/* Sobrescribir el botón delete con estilos más visibles para admin */
+.delete-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 3px 8px;
+    background: linear-gradient(135deg, #f59f0b 0%, #ff0000 100%);
+    color: white !important;
+    border: none !important;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.55rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4) !important;
+    white-space: nowrap;
+    text-transform: capitalize;
+    letter-spacing: 0.3px;
+    min-width: 50px;
+    height: 24px;
+    line-height: 1;
+}
+
+.delete-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.6) !important;
+}
+
+.delete-button:active {
+    transform: translateY(0);
+}
+
+/* Estilos adicionales para admin */
+.test-card-admin {
+    background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+    border: 1px solid rgba(102, 126, 234, 0.08);
+    box-shadow: 0 2px 12px rgba(55, 65, 81, 0.06);
+}
+
+.test-card-admin:hover {
+    box-shadow: 0 6px 20px rgba(55, 65, 81, 0.08);
+    transform: translateY(-1px);
+}
+
+.test-card-admin::before {
+    background: linear-gradient(90deg, #764ba2 0%, #667eea 100%);
+}
+
+/* Modal para confirmación de eliminación */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 32px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUpModal 0.3s ease;
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 12px 0;
+}
+
+.modal-message {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 24px 0;
+    line-height: 1.5;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.modal-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: capitalize;
+}
+
+.modal-button-cancel {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1.5px solid #e5e7eb;
+}
+
+.modal-button-cancel:hover {
+    background: #e5e7eb;
+    border-color: #d1d5db;
+}
+
+.modal-button-delete {
+    background: linear-gradient(135deg, #f59f0b 0%, #ff0000 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.modal-button-delete:hover {
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
+    transform: translateY(-1px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUpModal {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

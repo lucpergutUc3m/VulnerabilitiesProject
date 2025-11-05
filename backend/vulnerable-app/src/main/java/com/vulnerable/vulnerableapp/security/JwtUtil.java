@@ -54,7 +54,7 @@ public class JwtUtil {
         return claimsResolver.apply(claims);
     }
     
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
@@ -126,6 +126,10 @@ public class JwtUtil {
             if (roleClaim != null) {
                 Integer tokenRole = ((Number) roleClaim).intValue();
                 if (!tokenRole.equals(appUser.getRole())) {
+                    System.err.println("[JWT ERROR] Role mismatch!");
+                    System.err.println("  Token role: " + tokenRole);
+                    System.err.println("  DB role: " + appUser.getRole());
+                    System.err.println("  User: " + username);
                     return false; // Token role doesn't match - possible privilege escalation attempt
                 }
             }

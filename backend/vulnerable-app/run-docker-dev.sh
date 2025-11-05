@@ -27,11 +27,11 @@ if ! docker info > /dev/null 2>&1; then
 fi
 
 echo "[1/3] Starting PostgreSQL and Adminer..."
-echo "Command: docker compose --profile dev up -d"
+echo "Command: docker compose -f devdoc/compose.yaml --profile dev up -d"
 echo "Working directory: $SCRIPT_DIR"
 
 cd "$SCRIPT_DIR"
-docker compose --profile dev up -d
+docker compose -f devdoc/compose.yaml --profile dev up -d
 
 if [ $? -ne 0 ]; then
     echo "[ERROR] Failed to start Docker containers!"
@@ -77,7 +77,7 @@ echo "========================================"
 echo ""
 
 # Change to project root
-cd "$PROJECT_ROOT"
+cd "$SCRIPT_DIR"
 
 # Set the profiles - docker-dev for PostgreSQL, seeder for automatic data initialization
 export SPRING_PROFILES_ACTIVE=docker-dev,seeder
@@ -87,10 +87,10 @@ echo "SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE"
 echo ""
 
 # Start the application
-if [ -f "$PROJECT_ROOT/mvnw" ]; then
-    "$PROJECT_ROOT/mvnw" spring-boot:run
+if [ -f "$SCRIPT_DIR/mvnw" ]; then
+    "$SCRIPT_DIR/mvnw" spring-boot:run
 else
-    echo "Error: mvnw not found in $PROJECT_ROOT"
+    echo "Error: mvnw not found in $SCRIPT_DIR"
     exit 1
 fi
 

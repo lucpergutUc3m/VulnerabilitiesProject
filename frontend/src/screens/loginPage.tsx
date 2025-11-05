@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import LoginForm from '../components/loginForm';
-import type { LoginFormData, AuthResponse } from '../types/auth';
-import { config } from '@env';
+import type { LoginFormData } from '../types/auth';
+import authService from '../services/authService';
 import logoImg from '../assets/images/logo.svg';
 import styles from '../css/loginPage.module.css';
 
@@ -12,7 +12,7 @@ const LoginPage: React.FC = () => {
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [authErrorMessage, setAuthErrorMessage] = useState<string>('');
 
-  // Get the page to redirect to after login
+
   const redirectPathAfterLogin = (location.state as { from?: { pathname: string } } | null)?.from?.pathname || '/';
 
   const handleLoginAttempt = async (formData: LoginFormData) => {
@@ -20,43 +20,10 @@ const LoginPage: React.FC = () => {
     setAuthErrorMessage('');
 
     try {
-      // Log configuration for debugging
-      if (config.app.debug) {
-        console.log('API Base URL:', config.api.baseUrl);
-        console.log('App Name:', config.app.name);
-        console.log('Environment:', config.app.environment);
-      }
+
+      await authService.login(formData.email, formData.password);
       
-      // Make real API call to backend
-      const response = await fetch(`${config.api.baseUrl}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
 
-      console.log('Response Status:', response.status);
-      console.log('Response Headers:', {
-        contentType: response.headers.get('content-type'),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Invalid credentials. Please verify your email and password.');
-      }
-
-      // Parse the response
-      const authResponse: AuthResponse = await response.json();
-      
-      // Log the auth response for debugging
-      console.log('Auth Response:', authResponse);
-      console.log('Token:', authResponse.token);
-      console.log('User:', authResponse.user);
-
-      // Save to localStorage
-      localStorage.setItem('authToken', authResponse.token);
-      localStorage.setItem('user', JSON.stringify(authResponse.user));
-
-      // Redirect to previous page or home
       navigate(redirectPathAfterLogin, { replace: true });
       
     } catch (error) {
@@ -65,7 +32,6 @@ const LoginPage: React.FC = () => {
       } else {
         setAuthErrorMessage('Invalid credentials. Please verify your email and password.');
       }
-      console.error('Login error:', error);
     } finally {
       setIsAuthLoading(false);
     }

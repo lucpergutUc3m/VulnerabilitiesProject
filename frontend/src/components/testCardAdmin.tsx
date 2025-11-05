@@ -2,8 +2,10 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import styles from '../css/tests.card.module.css';
-import { FaEye, FaPlay } from 'react-icons/fa';
+import adminStyles from '../css/testCardAdmin.module.css';
+import { FaEye, FaPlay, FaTrash } from 'react-icons/fa';
 import type { Test } from '../services/testService';
+import authService from '../services/authService';
 
 interface TestCardProps {
     test: Test;
@@ -11,22 +13,26 @@ interface TestCardProps {
     defaultEmoji?: string;
     openPickerId?: number | null;
     onOpenPickerChange?: (id: number | null) => void;
+    onTestDeleted?: () => void;
 }
 
 interface TestCardListProps {
     tests: Test[];
     onEmojiChange?: (testId: number, newEmoji: string) => void;
+    onTestDeleted?: () => void;
 }
 
-const TestCard = ({
+const TestCardAdmin = ({
     test,
     onEmojiChange,
     defaultEmoji = '📚',
     openPickerId,
-    onOpenPickerChange
+    onOpenPickerChange,
+    onTestDeleted
 }: TestCardProps) => {
     const navigate = useNavigate();
     const [selectedEmoji, setSelectedEmoji] = useState(test.emoji || defaultEmoji);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const selectorRef = useRef<HTMLDivElement>(null);
     const pickerRef = useRef<HTMLDivElement>(null);
 
@@ -48,14 +54,62 @@ const TestCard = ({
 
     const handleViewTest = (e: React.MouseEvent) => {
         e.stopPropagation();
-        navigate(`/test/${test.id}`, {
-            state: { showQuestions: true, questions: test.questions }
+        navigate(`/test/${test.id}`, { 
+            state: { showQuestions: true, questions: test.questions } 
         });
     };
 
     const handlePlayTest = (e: React.MouseEvent) => {
         e.stopPropagation();
         navigate(`/test/${test.id}/questions`);
+    };
+
+    const handleDeleteClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setShowDeleteModal(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        try {
+            const token = authService.getToken();
+            
+            if (!token) {
+                setShowDeleteModal(false);
+                return;
+            }
+
+            // Use admin route if user is admin, otherwise use regular user route
+            const isAdmin = authService.isAdminUI();
+            const endpoint = isAdmin 
+                ? `http://localhost:8080/api/admin/tests/${test.id}`
+                : `http://localhost:8080/api/tests/${test.id}`;
+
+            const response = await fetch(endpoint, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                await response.json().catch(() => ({})); 
+                setShowDeleteModal(false);
+                return;
+            }
+
+            setShowDeleteModal(false);
+            
+            if (onTestDeleted) {
+                onTestDeleted();
+            }
+        } catch {
+            setShowDeleteModal(false);
+        }
+    };
+
+    const handleCancelDelete = () => {
+        setShowDeleteModal(false);
     };
 
     const getPickerStyle = () => {
@@ -75,7 +129,7 @@ const TestCard = ({
 
     return (
         <>
-            <div className={`${styles['test-card']} ${styles['test-card-normal']}`}>
+            <div className={`${styles['test-card']} ${styles['test-card-admin']}`}>
                 {/* Columna izquierda - Emoji */}
                 <div className={styles['test-card-header']}>
                     <div className={styles['emoji-selector-container']}>
@@ -94,7 +148,7 @@ const TestCard = ({
                     <div className={styles['test-main-content']}>
                         <div className={styles['test-title-topic']} >
                             <h3 className={styles['test-title']}>{test.title}</h3>
-                            <span className={styles['test-topic-wrapper']}>
+                            <span className={styles['test-topic-wrapper']} data-topic={test.topic}>
                                 <span className={styles['test-topic']}>{test.topic}</span>
                             </span>
                         </div>
@@ -109,16 +163,19 @@ const TestCard = ({
                                 {test.questions.length} preguntas
                             </span>
                         </div>
-                        <div className={styles['test-meta-buttons']}>
-                            <button className={styles['view-button']} onClick={handleViewTest}>
-                                <FaEye className={styles['button-icon']} />
-                                Watch
-                            </button>
-                            <button className={styles['play-button']} onClick={handlePlayTest}>
-                                <FaPlay className={styles['button-icon']} />
-                                Play
-                            </button>
-                        </div>
+                        <button className={styles['view-button']} onClick={handleViewTest}>
+                            <FaEye className={styles['button-icon']} />
+                            Watch
+                        </button>
+
+                        <button className={styles['play-button']} onClick={handlePlayTest}>
+                            <FaPlay className={styles['button-icon']} />
+                            Play
+                        </button>
+                        <button className={adminStyles['delete-button']} onClick={handleDeleteClick}>
+                            <FaTrash className={styles['button-icon']} />
+                            Delete
+                        </button>
                     </div>
                 </div>
             </div>
@@ -143,22 +200,50 @@ const TestCard = ({
                     </div>,
                     document.body
                 )}
+
+            {showDeleteModal &&
+                createPortal(
+                    <div className={adminStyles['modal-overlay']}>
+                        <div className={adminStyles['modal-content']}>
+                            <h2 className={adminStyles['modal-title']}>Delete Test</h2>
+                            <p className={adminStyles['modal-message']}>
+                                Are you sure you want to delete the test "{test.title}"? This action cannot be undone.
+                            </p>
+                            <div className={adminStyles['modal-buttons']}>
+                                <button 
+                                    className={`${adminStyles['modal-button']} ${adminStyles['modal-button-cancel']}`}
+                                    onClick={handleCancelDelete}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    className={`${adminStyles['modal-button']} ${adminStyles['modal-button-delete']}`}
+                                    onClick={handleConfirmDelete}
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>,
+                    document.body
+                )}
         </>
     );
 };
 
-const TestCardList = ({ tests, onEmojiChange }: TestCardListProps) => {
+const TestCardListAdmin = ({ tests, onEmojiChange, onTestDeleted }: TestCardListProps) => {
     const [openPickerId, setOpenPickerId] = useState<number | null>(null);
 
     return (
         <div className={styles['test-cards-container']}>
             {tests.map((test: Test) => (
-                <TestCard
+                <TestCardAdmin
                     key={test.id}
                     test={test}
                     onEmojiChange={onEmojiChange}
                     openPickerId={openPickerId}
                     onOpenPickerChange={setOpenPickerId}
+                    onTestDeleted={onTestDeleted}
                 />
             ))}
         </div>
@@ -166,5 +251,5 @@ const TestCardList = ({ tests, onEmojiChange }: TestCardListProps) => {
 };
 
 // Exportaciones
-export { TestCard, TestCardList };
-export default TestCardList;
+export { TestCardAdmin, TestCardListAdmin };
+export default TestCardListAdmin;
