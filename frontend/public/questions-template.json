@@ -1,0 +1,35 @@
+[
+  {
+    "question": "¿Cuál es la capital de Francia?",
+    "options": [
+      "Londres",
+      "París",
+      "Berlín",
+      "Madrid"
+    ],
+    "correctAnswer": 1,
+    "explanation": "París es la capital de Francia desde el siglo XII."
+  },
+  {
+    "question": "¿Cuántos planetas hay en el sistema solar?",
+    "options": [
+      "7",
+      "8",
+      "9",
+      "10"
+    ],
+    "correctAnswer": 1,
+    "explanation": "Hay 8 planetas desde que Plutón fue reclasificado como planeta enano en 2006."
+  },
+  {
+    "question": "¿Qué es JavaScript?",
+    "options": [
+      "Un lenguaje de programación",
+      "Un framework",
+      "Una base de datos",
+      "Un sistema operativo"
+    ],
+    "correctAnswer": 0,
+    "explanation": "JavaScript es un lenguaje de programación interpretado, usado principalmente en desarrollo web."
+  }
+]

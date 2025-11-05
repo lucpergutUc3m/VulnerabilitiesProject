@@ -1,9 +1,4 @@
-/**
- * Hook personalizado para usar tests en componentes React
- * Utiliza el servicio centralizado que lee desde tests.json
- */
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { testService, type Test } from '../services/testService';
 
 export const useTests = () => {
@@ -11,25 +6,38 @@ export const useTests = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const loadTests = async () => {
-            try {
-                setLoading(true);
-                const testsData = await testService.getAllTests();
-                setTests(testsData);
-                setError(null);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Error al cargar los tests');
-                console.error('Error in useTests:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const loadTests = async () => {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            setTests([]);
+            setLoading(false);
+            setError(null);
+            return;
+        }
 
+        try {
+            setLoading(true);
+            const testsData = await testService.getAllTests();
+            setTests(testsData);
+            setError(null);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error al cargar los tests');
+            setTests([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         loadTests();
     }, []);
 
-    return { tests, loading, error };
+    const refetch = useCallback(async () => {
+        testService.clearCache();
+        await loadTests();
+    }, []);
+
+    return { tests, loading, error, refetch };
 };
 
 export const useTestById = (testId: number | string | undefined) => {
@@ -51,7 +59,6 @@ export const useTestById = (testId: number | string | undefined) => {
                 setError(null);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Error al cargar el test');
-                console.error('Error in useTestById:', err);
             } finally {
                 setLoading(false);
             }

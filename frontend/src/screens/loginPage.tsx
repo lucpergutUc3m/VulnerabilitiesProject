@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import LoginForm from '../components/loginForm';
-import type { LoginFormData, AuthResponse } from '../types/auth';
-import { config } from '@env';
+import type { LoginFormData } from '../types/auth';
+import authService from '../services/authService';
 import logoImg from '../assets/images/logo.svg';
 import styles from '../css/loginPage.module.css';
 
@@ -12,7 +12,7 @@ const LoginPage: React.FC = () => {
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [authErrorMessage, setAuthErrorMessage] = useState<string>('');
 
-  // Get the page to redirect to after login
+
   const redirectPathAfterLogin = (location.state as { from?: { pathname: string } } | null)?.from?.pathname || '/';
 
   const handleLoginAttempt = async (formData: LoginFormData) => {
@@ -20,45 +20,18 @@ const LoginPage: React.FC = () => {
     setAuthErrorMessage('');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Log configuration for debugging
-      if (config.app.debug) {
-        console.log('API Base URL:', config.api.baseUrl);
-        console.log('App Name:', config.app.name);
-        console.log('Environment:', config.app.environment);
-      }
-      
-      // En producción usarías:
-      // const response = await fetch(`${config.api.baseUrl}/auth/login`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // });
-      
-    
-      // Successful response simulation
-      const mockAuthResponse: AuthResponse = {
-        user: {
-          id: '1',
-          name: 'John Doe',
-          email: formData.email
-        },
-        token: 'mock-jwt-token',
-        expiresIn: 3600
-      };
 
-      // Save to localStorage
-      localStorage.setItem('authToken', mockAuthResponse.token);
-      localStorage.setItem('user', JSON.stringify(mockAuthResponse.user));
+      await authService.login(formData.email, formData.password);
+      
 
-      // Redirect to previous page or home
       navigate(redirectPathAfterLogin, { replace: true });
       
     } catch (error) {
-      setAuthErrorMessage('Invalid credentials. Please verify your email and password.');
-      console.error('Login error:', error);
+      if (error instanceof Error) {
+        setAuthErrorMessage(error.message);
+      } else {
+        setAuthErrorMessage('Invalid credentials. Please verify your email and password.');
+      }
     } finally {
       setIsAuthLoading(false);
     }
@@ -89,6 +62,16 @@ const LoginPage: React.FC = () => {
             isLoading={isAuthLoading}
             error={authErrorMessage}
           />
+
+          {/* Link to register */}
+          <div className={styles.footer}>
+            <p className={styles.footerText}>
+              Don't have an account?{' '}
+              <Link to="/register" className={styles.link}>
+                Create one
+              </Link>
+            </p>
+          </div>
         </div>
 
       </div>

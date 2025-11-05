@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirecting to H2 Console...</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h2>Redirecting to H2 Console with correct settings...</h2>
+    <p>If not redirected, <a href="#" id="manualLink">click here</a></p>
+    
+    <script>
+        // Get the current directory path from the backend
+        const jdbcUrl = 'jdbc:h2:file:C:/git/VulnerabilitiesProject/backend/vulnerable-app/data/vulnerableapp-dev';
+        
+        // Encode the JDBC URL for the H2 console
+        const h2Url = '/h2-console/login.jsp?jsessionid=' + 
+                      '&url=' + encodeURIComponent(jdbcUrl) +
+                      '&driver=org.h2.Driver' +
+                      '&user=sa' +
+                      '&password=';
+        
+        // Set the manual link
+        document.getElementById('manualLink').href = h2Url;
+        
+        // Auto-redirect after 1 second
+        setTimeout(function() {
+            window.location.href = h2Url;
+        }, 1000);
+    </script>
+    
+    <hr>
+    <h3>Manual Connection Details:</h3>
+    <p><strong>JDBC URL:</strong> <code>jdbc:h2:file:C:/git/VulnerabilitiesProject/backend/vulnerable-app/data/vulnerableapp-dev</code></p>
+    <p><strong>User Name:</strong> <code>sa</code></p>
+    <p><strong>Password:</strong> <em>(leave empty)</em></p>
+    
+    <hr>
+    <p><strong>Instructions:</strong></p>
+    <ol>
+        <li>In the H2 Console login page, look for the <strong>JDBC URL</strong> field</li>
+        <li>It shows <code>jdbc:h2:~/test</code> by default</li>
+        <li><strong>Select all the text</strong> in that field (triple-click or Ctrl+A)</li>
+        <li><strong>Delete it</strong> and paste the correct URL above</li>
+        <li>Click <strong>Connect</strong></li>
+    </ol>
+</body>
+</html>

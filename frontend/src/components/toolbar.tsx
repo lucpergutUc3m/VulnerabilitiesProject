@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styles from '../css/toolbar.module.css';
 import logoImg from '../assets/images/logo.svg';
+import { useNavigate } from 'react-router-dom';
 
 const UserIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -30,6 +31,7 @@ interface ToolbarProps {
 
 const Toolbar: React.FC<ToolbarProps> = ({ appName, onLoginClick, onLogout, user }) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleUserIconClick = () => {
     if (user) {
@@ -44,29 +46,36 @@ const Toolbar: React.FC<ToolbarProps> = ({ appName, onLoginClick, onLogout, user
     onLogout();
   };
 
+  const handleViewProfile = () => {
+    setIsUserMenuOpen(false);
+    navigate('/user');
+  };
+
   return (
     <header className={styles.toolbar}>
       <div className={styles.toolbarContent}>
         {/* Logo and app name */}
-        <div className={styles.logoSection}>
-           <div className={styles.logo}>
-              <img src={logoImg} alt="Logo" />
-            </div>
+        <div className={styles.brandSection}>
+          <div className={styles.logo}>
+            <img src={logoImg} alt="QuestionFlow Logo" />
+          </div>
+          <h1 className={styles.appName}>{appName}</h1>
         </div>
-        <h1 className={styles.appName}>{appName}</h1>
+
         {/* User section/login */}
         <div className={styles.userSection}>
           {user ? (
             <div className={styles.userMenuContainer}>
-              <button 
+              <button
                 className={styles.userButton}
                 onClick={handleUserIconClick}
                 aria-label="User menu"
+                aria-expanded={isUserMenuOpen}
               >
                 {user.avatar ? (
-                  <img 
-                    src={user.avatar} 
-                    alt={user.name} 
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
                     className={styles.userAvatar}
                   />
                 ) : (
@@ -76,23 +85,31 @@ const Toolbar: React.FC<ToolbarProps> = ({ appName, onLoginClick, onLogout, user
                 )}
                 <span className={styles.userName}>{user.name}</span>
               </button>
-              
+
               {isUserMenuOpen && (
                 <div className={styles.userMenu}>
                   <div className={styles.userInfo}>
                     <p className={styles.userEmail}>{user.email}</p>
                   </div>
-                  <button 
+                  <div className={styles.menuDivider}></div>
+                  <button
+                    className={styles.menuItem}
+                    onClick={handleViewProfile}
+                  >
+                    View Profile
+                  </button>
+                  <div className={styles.menuDivider}></div>
+                  <button
                     className={`${styles.menuItem} ${styles.logoutItem}`}
                     onClick={handleUserMenuLogout}
                   >
-                    Logout
+                    Sign Out
                   </button>
                 </div>
               )}
             </div>
           ) : (
-            <button 
+            <button
               className={styles.loginButton}
               onClick={onLoginClick}
               aria-label="Sign in"

@@ -48,8 +48,8 @@ const TestCard = ({
 
     const handleViewTest = (e: React.MouseEvent) => {
         e.stopPropagation();
-        navigate(`/test/${test.id}`, { 
-            state: { showQuestions: true, questions: test.questions } 
+        navigate(`/test/${test.id}`, {
+            state: { showQuestions: true, questions: test.questions }
         });
     };
 
@@ -75,7 +75,7 @@ const TestCard = ({
 
     return (
         <>
-            <div className={styles['test-card']}>
+            <div className={`${styles['test-card']} ${styles['test-card-normal']}`}>
                 {/* Columna izquierda - Emoji */}
                 <div className={styles['test-card-header']}>
                     <div className={styles['emoji-selector-container']}>
@@ -109,15 +109,16 @@ const TestCard = ({
                                 {test.questions.length} preguntas
                             </span>
                         </div>
-                        <button className={styles['view-button']} onClick={handleViewTest}>
-                            <FaEye className={styles['button-icon']} />
-                            Watch
-                        </button>
-
-                        <button className={styles['play-button']} onClick={handlePlayTest}>
-                            <FaPlay className={styles['button-icon']} />
-                            Play
-                        </button>
+                        <div className={styles['test-meta-buttons']}>
+                            <button className={styles['view-button']} onClick={handleViewTest}>
+                                <FaEye className={styles['button-icon']} />
+                                Watch
+                            </button>
+                            <button className={styles['play-button']} onClick={handlePlayTest}>
+                                <FaPlay className={styles['button-icon']} />
+                                Play
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

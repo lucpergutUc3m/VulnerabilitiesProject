@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import styles from '../css/playTest.module.css';
+import styles from '../css/testScreen.module.css';
 import { IoMdArrowBack } from "react-icons/io";
+import { MdNavigateBefore, MdNavigateNext } from "react-icons/md";
 import { useTestById } from '../hooks/useTests';
+import SafeText from '../components/SafeText';
 
 interface UserAnswers {
     [questionId: number]: number | null;
@@ -81,7 +83,7 @@ const TestScreen = () => {
         return (
             <div className={styles.loadingContainer}>
                 <div className={styles.spinner}></div>
-                <p>Cargando preguntas...</p>
+                <p>Loading your questions...</p>
             </div>
         );
     }
@@ -90,9 +92,9 @@ const TestScreen = () => {
         return (
             <div className={styles.errorContainer}>
                 <h2>Error</h2>
-                <p>{error || 'Test no encontrado'}</p>
+                <p>{error || 'Test not found'}</p>
                 <button onClick={handleGoBack} className={styles.backButton}>
-                    Volver atrás
+                    Go Back
                 </button>
             </div>
         );
@@ -108,7 +110,7 @@ const TestScreen = () => {
             <div className={styles.backButtonContainer}>
                 <button onClick={handleGoBack} className={styles.backButton}>
                     <IoMdArrowBack />
-                    Volver al inicio
+                    Go Back
                 </button>
             </div>
 
@@ -118,7 +120,7 @@ const TestScreen = () => {
                     <div className={styles.progressHeader}>
                         <h2 className={styles.testTitle}>{test.title}</h2>
                         <span className={styles.progressCounter}>
-                            Pregunta {currentQuestionIndex + 1} de {totalQuestions}
+                            Question {currentQuestionIndex + 1} of {totalQuestions}
                         </span>
                     </div>
                     
@@ -134,7 +136,7 @@ const TestScreen = () => {
                 <div className={styles.questionSection}>
                     <div className={styles.questionContainer}>
                         <h3 className={styles.questionText}>
-                            {currentQuestion.question}
+                            <SafeText text={currentQuestion.question} />
                         </h3>
 
                         {/* Opciones de respuesta */}
@@ -167,7 +169,9 @@ const TestScreen = () => {
                                         <span className={styles.optionLabel}>
                                             {String.fromCharCode(65 + index)}
                                         </span>
-                                        <span className={styles.optionText}>{option}</span>
+                                        <span className={styles.optionText}>
+                                            <SafeText text={option} />
+                                        </span>
                                     </button>
                                 );
                             })}
@@ -176,8 +180,10 @@ const TestScreen = () => {
                         {/* Explicación */}
                         {isAnswered && currentQuestion.explanation && (
                             <div className={styles.explanationBox}>
-                                <h4>Explicación:</h4>
-                                <p>{currentQuestion.explanation}</p>
+                                <h4>Explanation:</h4>
+                                <p>
+                                    <SafeText text={currentQuestion.explanation} />
+                                </p>
                             </div>
                         )}
                     </div>
@@ -190,7 +196,7 @@ const TestScreen = () => {
                         className={styles.prevButton}
                         disabled={currentQuestionIndex === 0}
                     >
-                        ← Anterior
+                        <MdNavigateBefore /> Previous
                     </button>
 
                     <div className={styles.questionIndicators}>
@@ -212,7 +218,7 @@ const TestScreen = () => {
                             className={styles.nextButton}
                             disabled={!isAnswered}
                         >
-                            Siguiente →
+                            Next <MdNavigateNext />
                         </button>
                     ) : (
                         <button 
@@ -220,7 +226,7 @@ const TestScreen = () => {
                             className={styles.finishButton}
                             disabled={!isAnswered}
                         >
-                            Terminar Test
+                            Finish Test
                         </button>
                     )}
                 </div>

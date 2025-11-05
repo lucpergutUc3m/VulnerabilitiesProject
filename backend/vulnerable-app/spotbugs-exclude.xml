@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!-- 
+    Use this file to exclude false positives from SpotBugs
+    Example exclusion:
+    
+    <Match>
+        <Class name="com.vulnerable.vulnerableapp.VulnerableAppBackendApplication" />
+        <Bug pattern="SPRING_CSRF_PROTECTION_DISABLED" />
+    </Match>
+    
+    Documentation: https://spotbugs.readthedocs.io/en/stable/filter.html
+    -->
+    
+    <!-- Exclude generated code -->
+    <Match>
+        <Class name="~.*\.mapper\..*Impl" />
+    </Match>
+    
+    <!-- Exclude test classes from some checks -->
+    <Match>
+        <Class name="~.*Test" />
+        <Bug pattern="HARD_CODE_PASSWORD" />
+    </Match>
+</FindBugsFilter>
