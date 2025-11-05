@@ -49,6 +49,11 @@ build/
 ### Secrets and Credentials ###
 secrets/
 *.key
+
+### Security Audit Reports ###
+zap-reports/
+dependency-check-data/
+app.log
 *.pem
 *.p12
 *.jks

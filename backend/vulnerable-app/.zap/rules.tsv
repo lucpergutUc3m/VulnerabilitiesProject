@@ -1,0 +1,21 @@
+# ZAP Rules Configuration
+# This file allows you to ignore or adjust severity of specific ZAP alerts
+# Format: [rule-id] [IGNORE|WARN|INFO] [URL-pattern or blank for all]
+
+# Example: Ignore CSRF warnings on public endpoints
+# 40012	IGNORE	http://localhost:8080/api/auth/.*
+
+# Example: Downgrade SQL injection alerts on specific endpoint to INFO
+# 40018	INFO	http://localhost:8080/api/search.*
+
+# Common Rule IDs:
+# 10202 - Absence of Anti-CSRF Tokens
+# 10021 - X-Content-Type-Options Header Missing
+# 10020 - X-Frame-Options Header Missing
+# 10017 - Cross-Domain JavaScript Source File Inclusion
+# 10054 - Cookie without SameSite Attribute
+# 10096 - Timestamp Disclosure
+# 40012 - Cross Site Scripting (Reflected)
+# 40014 - Cross Site Scripting (Persistent)
+# 40018 - SQL Injection
+# 90034 - Cloud Metadata Potentially Exposed
