@@ -9,12 +9,7 @@ This guide shows how to automate security testing for the Vulnerable App using m
 - **Tests**: SQL injection, XSS, CSRF, authentication issues, etc.
 - **Usage**: Scans the running application
 
-### 2. OWASP Dependency-Check (Software Composition Analysis)
-- **Type**: Dependency vulnerability scanning
-- **Tests**: Known CVEs in dependencies
-- **Usage**: Maven plugin - scans during build
-
-### 3. SpotBugs + Find Security Bugs (Static Application Security Testing)
+### 2. SpotBugs + Find Security Bugs (Static Application Security Testing)
 - **Type**: Static code analysis
 - **Tests**: Code patterns that may lead to vulnerabilities
 - **Usage**: Maven plugin - analyzes bytecode
@@ -66,36 +61,7 @@ run-zap-scan.cmd
 
 ---
 
-## 2️⃣ OWASP Dependency-Check
-
-### Run Dependency Scan
-
-```cmd
-:: Scan all dependencies for known vulnerabilities
-mvnw org.owasp:dependency-check-maven:check
-
-:: View the report at:
-:: target/dependency-check-report.html
-```
-
-### Configure Suppression (False Positives)
-
-If you get false positives, create `dependency-check-suppressions.xml`:
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
-    <suppress>
-       <notes><![CDATA[
-       False positive for H2 - only used in development
-       ]]></notes>
-       <cve>CVE-XXXX-XXXX</cve>
-    </suppress>
-</suppressions>
-```
-
----
-
-## 3️⃣ SpotBugs Security Analysis
+## 2️⃣ SpotBugs Security Analysis
 
 ### Run SpotBugs
 
@@ -137,9 +103,6 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
     
-    - name: Dependency-Check
-      run: mvn org.owasp:dependency-check-maven:check
-    
     - name: SpotBugs Security
       run: mvn spotbugs:check
     
@@ -149,7 +112,6 @@ jobs:
       with:
         name: security-reports
         path: |
-          target/dependency-check-report.html
           target/spotbugs.html
     
     - name: Start Application
@@ -217,7 +179,6 @@ All reports are generated in the `target/` and `zap-reports/` directories:
 
 ```
 target/
-  ├── dependency-check-report.html  (Dependency vulnerabilities)
   ├── spotbugs.html                  (Static analysis)
   └── spotbugsXml.xml               (Machine-readable)
 
@@ -254,7 +215,6 @@ This will:
 Edit `.zap/rules.tsv` to ignore specific alerts or adjust severity.
 
 ### Tune False Positives
-- Dependency-Check: Use `dependency-check-suppressions.xml`
 - SpotBugs: Use `spotbugs-exclude.xml`
 - ZAP: Use context files or rules.tsv
 

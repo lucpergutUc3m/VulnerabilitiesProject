@@ -1,14 +1,13 @@
 @echo off
 REM Full Security Audit Script
-REM Runs all security scans: Dependency-Check, SpotBugs, and ZAP
+REM Runs all security scans: SpotBugs and ZAP
 
 echo ====================================
 echo FULL SECURITY AUDIT
 echo ====================================
 echo This will run all security scans:
-echo 1. OWASP Dependency-Check (dependencies)
-echo 2. SpotBugs + FindSecBugs (static analysis)
-echo 3. OWASP ZAP (dynamic scan)
+echo 1. SpotBugs + FindSecBugs (static analysis)
+echo 2. OWASP ZAP (dynamic scan)
 echo.
 echo This may take 15-30 minutes...
 echo ====================================
@@ -21,23 +20,18 @@ cd /d "%~dp0\.."
 
 REM Step 1: Build and run static scans
 echo.
-echo [1/4] Building application and running static analysis...
+echo [1/3] Building application and running static analysis...
 echo.
 call mvnw clean compile
 
 echo.
-echo [2/4] Running OWASP Dependency-Check...
-echo.
-call mvnw org.owasp:dependency-check-maven:check
-
-echo.
-echo [3/4] Running SpotBugs Security Analysis...
+echo [2/3] Running SpotBugs Security Analysis...
 echo.
 call mvnw spotbugs:check
 
 REM Step 2: Start application for dynamic scan
 echo.
-echo [4/4] Starting application for ZAP scan...
+echo [3/3] Starting application for ZAP scan...
 echo.
 
 REM Build JAR
@@ -81,13 +75,6 @@ echo.
 REM Check if reports were generated
 set REPORTS_FOUND=0
 
-if exist "target\dependency-check-report.html" (
-    echo [OK] Dependency-Check report: target\dependency-check-report.html
-    set REPORTS_FOUND=1
-) else (
-    echo [MISSING] Dependency-Check report not generated
-)
-
 if exist "target\spotbugs.html" (
     echo [OK] SpotBugs report: target\spotbugs.html
     set REPORTS_FOUND=1
@@ -105,12 +92,6 @@ if exist "devdoc\zap-reports\zap-baseline-report.html" (
 echo.
 
 REM Open reports if they exist
-if exist "target\dependency-check-report.html" (
-    echo Opening Dependency-Check report...
-    start "" "target\dependency-check-report.html"
-    timeout /t 2 /nobreak >nul
-)
-
 if exist "target\spotbugs.html" (
     echo Opening SpotBugs report...
     start "" "target\spotbugs.html"

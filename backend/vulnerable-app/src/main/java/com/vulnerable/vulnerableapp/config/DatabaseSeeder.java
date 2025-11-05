@@ -150,7 +150,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .description("Test on fundamental Java concepts")
                     .questionsJson(objectMapper.writeValueAsString(questions1))
                     .timeLimitMinutes(30)
-                    .owner(admin)
+                    .ownerId(admin.getId())
                     .isPublic(true)
                     .build());
         } catch (Exception e) {
@@ -199,7 +199,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .description("Basic web security concepts")
                     .questionsJson(objectMapper.writeValueAsString(questions2))
                     .timeLimitMinutes(25)
-                    .owner(john)
+                    .ownerId(john.getId())
                     .isPublic(true)
                     .build());
         } catch (Exception e) {
@@ -243,7 +243,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .description("Introduction to SQL queries")
                     .questionsJson(objectMapper.writeValueAsString(questions3))
                     .timeLimitMinutes(20)
-                    .owner(jane)
+                    .ownerId(jane.getId())
                     .isPublic(true)
                     .build());
         } catch (Exception e) {
@@ -277,7 +277,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .description("Advanced Spring Boot concepts (Private)")
                     .questionsJson(objectMapper.writeValueAsString(questions4))
                     .timeLimitMinutes(45)
-                    .owner(admin)
+                    .ownerId(admin.getId())
                     .isPublic(false)
                     .build());
         } catch (Exception e) {
@@ -316,7 +316,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .description("REST API development concepts")
                     .questionsJson(objectMapper.writeValueAsString(questions5))
                     .timeLimitMinutes(30)
-                    .owner(john)
+                    .ownerId(john.getId())
                     .isPublic(true)
                     .build());
         } catch (Exception e) {

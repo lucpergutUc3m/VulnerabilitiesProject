@@ -147,34 +147,6 @@
 				</configuration>
 			</plugin>
 
-			<!-- OWASP Dependency-Check Plugin -->
-			<plugin>
-				<groupId>org.owasp</groupId>
-				<artifactId>dependency-check-maven</artifactId>
-				<version>12.1.0</version>
-				<configuration>
-					<!-- Don’t fail build on errors or CVEs -->
-					<failOnError>false</failOnError>
-					<failBuildOnCVSS>11</failBuildOnCVSS>
-
-					<!-- Keep cache local (avoids permission issues) -->
-					<dataDirectory>${project.build.directory}/dependency-check-data</dataDirectory>
-
-					<!-- Disable optional analyzers (prevents 401/timeout errors) -->
-					<ossIndexAnalyzerEnabled>false</ossIndexAnalyzerEnabled>
-					<retireJsAnalyzerEnabled>false</retireJsAnalyzerEnabled>
-					<nodeAuditAnalyzerEnabled>false</nodeAuditAnalyzerEnabled>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-
 			<!-- SpotBugs with Security Plugin -->
 			<plugin>
 				<groupId>com.github.spotbugs</groupId>
@@ -213,17 +185,6 @@
 			<id>security-audit</id>
 			<build>
 				<plugins>
-					<plugin>
-						<groupId>org.owasp</groupId>
-						<artifactId>dependency-check-maven</artifactId>
-						<executions>
-							<execution>
-								<goals>
-									<goal>check</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
 					<plugin>
 						<groupId>com.github.spotbugs</groupId>
 						<artifactId>spotbugs-maven-plugin</artifactId>

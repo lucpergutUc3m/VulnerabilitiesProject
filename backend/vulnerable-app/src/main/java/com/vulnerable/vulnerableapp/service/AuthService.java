@@ -51,7 +51,8 @@ public class AuthService {
         log.info("✓ User saved to database with ID: {}", user.getId());
         
         String token = jwtUtil.generateToken(user);
-        log.info("✓ JWT token generated");
+        String refreshToken = jwtUtil.generateRefreshToken(user);
+        log.info("✓ Tokens generated");
         
         log.info("✅ REGISTRATION SUCCESSFUL for user: {}", request.getEmail());
         log.info("=== REGISTRATION REQUEST END ===");
@@ -65,6 +66,8 @@ public class AuthService {
                         .build())
                 .token(token)
                 .expiresIn(jwtUtil.getExpirationTime())
+                .refreshToken(refreshToken)
+                .refreshExpiresIn(jwtUtil.getRefreshExpirationTime())
                 .build();
     }
     
@@ -93,7 +96,8 @@ public class AuthService {
         log.info("✓ User found in database: {} (ID: {})", user.getName(), user.getId());
         
         String token = jwtUtil.generateToken(user);
-        log.info("✓ JWT token generated");
+        String refreshToken = jwtUtil.generateRefreshToken(user);
+        log.info("✓ Tokens generated");
         
         log.info("✅ LOGIN SUCCESSFUL for user: {}", request.getEmail());
         log.info("=== LOGIN REQUEST END ===");
@@ -107,6 +111,8 @@ public class AuthService {
                         .build())
                 .token(token)
                 .expiresIn(jwtUtil.getExpirationTime())
+                .refreshToken(refreshToken)
+                .refreshExpiresIn(jwtUtil.getRefreshExpirationTime())
                 .build();
     }
     
@@ -127,5 +133,51 @@ public class AuthService {
         
         log.info("✅ LOGOUT SUCCESSFUL");
         log.info("=== LOGOUT REQUEST END ===");
+    }
+    
+    public AuthResponse refreshToken(String refreshTokenString) {
+        log.info("=== REFRESH TOKEN REQUEST START ===");
+        
+        try {
+            // Extract username from refresh token
+            String username = jwtUtil.extractUsername(refreshTokenString);
+            log.info("✓ Extracted username from refresh token: {}", username);
+            
+            // Load user from database
+            AppUser user = userRepository.findByEmail(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            log.info("✓ User loaded: {} (ID: {})", user.getEmail(), user.getId());
+            
+            // Validate refresh token
+            if (!jwtUtil.validateRefreshToken(refreshTokenString, user)) {
+                log.error("❌ Invalid or expired refresh token");
+                throw new RuntimeException("Invalid or expired refresh token");
+            }
+            log.info("✓ Refresh token validated");
+            
+            // Generate new tokens
+            String newAccessToken = jwtUtil.generateToken(user);
+            String newRefreshToken = jwtUtil.generateRefreshToken(user);
+            log.info("✓ New tokens generated");
+            
+            log.info("✅ TOKEN REFRESH SUCCESSFUL for user: {}", user.getEmail());
+            log.info("=== REFRESH TOKEN REQUEST END ===");
+            
+            return AuthResponse.builder()
+                    .user(UserResponse.builder()
+                            .id(user.getId())
+                            .name(user.getName())
+                            .email(user.getEmail())
+                            .role(user.getRole())
+                            .build())
+                    .token(newAccessToken)
+                    .expiresIn(jwtUtil.getExpirationTime())
+                    .refreshToken(newRefreshToken)
+                    .refreshExpiresIn(jwtUtil.getRefreshExpirationTime())
+                    .build();
+        } catch (Exception e) {
+            log.error("❌ TOKEN REFRESH FAILED: {}", e.getMessage());
+            throw new RuntimeException("Failed to refresh token: " + e.getMessage());
+        }
     }
 }

@@ -27,6 +27,9 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private Long expiration;
     
+    @Value("${jwt.refresh.expiration:604800000}")
+    private Long refreshExpiration;
+    
     @Value("${jwt.issuer:VulnerableApp}")
     private String issuer;
     
@@ -74,7 +77,6 @@ public class JwtUtil {
             AppUser appUser = (AppUser) userDetails;
             claims.put("userId", appUser.getId());
             claims.put("role", appUser.getRole());
-            claims.put("name", appUser.getName());
         }
         
         // Add roles/authorities to token
@@ -140,5 +142,48 @@ public class JwtUtil {
     
     public Long getExpirationTime() {
         return expiration;
+    }
+    
+    public Long getRefreshExpirationTime() {
+        return refreshExpiration;
+    }
+    
+    // Generate refresh token (simpler JWT with longer expiration)
+    public String generateRefreshToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "refresh");
+        
+        if (userDetails instanceof AppUser) {
+            AppUser appUser = (AppUser) userDetails;
+            claims.put("userId", appUser.getId());
+        }
+        
+        return Jwts.builder()
+                .claims(claims)
+                .subject(userDetails.getUsername())
+                .id(UUID.randomUUID().toString())
+                .issuer(issuer)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + refreshExpiration))
+                .signWith(getSigningKey())
+                .compact();
+    }
+    
+    // Validate refresh token
+    public Boolean validateRefreshToken(String token, UserDetails userDetails) {
+        try {
+            final String username = extractUsername(token);
+            Claims claims = extractAllClaims(token);
+            
+            // Check it's a refresh token
+            if (!"refresh".equals(claims.get("type"))) {
+                return false;
+            }
+            
+            // Validate username and expiration
+            return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

@@ -114,7 +114,7 @@ public class TestService {
             log.warn("⚠️ getAllTests() - Database returned empty list!");
         } else {
             allTests.forEach(test -> log.debug("  - Test ID: {}, Title: {}, Owner: {}", 
-                test.getId(), test.getTitle(), test.getOwner().getEmail()));
+                test.getId(), test.getTitle(), test.getOwnerId()));
         }
         return allTests.stream()
                 .map(testMapper::toTestResponse)

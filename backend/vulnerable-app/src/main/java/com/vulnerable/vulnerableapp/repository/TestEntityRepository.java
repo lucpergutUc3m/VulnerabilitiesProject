@@ -10,7 +10,6 @@ import java.util.List;
 
 @Repository
 public interface TestEntityRepository extends JpaRepository<TestEntity, Long> {
-    List<TestEntity> findByOwnerId(Long ownerId);
     
     List<TestEntity> findByOwnerId(Long ownerId);
     

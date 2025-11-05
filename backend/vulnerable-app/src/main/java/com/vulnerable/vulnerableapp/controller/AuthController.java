@@ -2,6 +2,7 @@ package com.vulnerable.vulnerableapp.controller;
 
 import com.vulnerable.vulnerableapp.dto.auth.AuthResponse;
 import com.vulnerable.vulnerableapp.dto.auth.LoginRequest;
+import com.vulnerable.vulnerableapp.dto.auth.RefreshTokenRequest;
 import com.vulnerable.vulnerableapp.dto.auth.RegisterRequest;
 import com.vulnerable.vulnerableapp.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,6 +55,19 @@ public class AuthController {
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             log.error("❌ POST /api/auth/logout - Logout failed: {}", e.getMessage());
+            throw e;
+        }
+    }
+    
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        log.info("🔵 POST /api/auth/refresh - Token refresh request received");
+        try {
+            AuthResponse response = authService.refreshToken(request.getRefreshToken());
+            log.info("✅ POST /api/auth/refresh - Token refresh successful (200 OK)");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("❌ POST /api/auth/refresh - Token refresh failed: {}", e.getMessage());
             throw e;
         }
     }

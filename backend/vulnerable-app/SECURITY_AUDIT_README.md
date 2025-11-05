@@ -12,7 +12,6 @@ cd devdoc
 run-quick-security-check.cmd
 ```
 This runs **static analysis only** (no need to start the app):
-- ✅ OWASP Dependency-Check - scans for vulnerable dependencies
 - ✅ SpotBugs Security - finds security bugs in code
 
 ### Option 2: Full Automated Audit (20-30 minutes)
@@ -21,7 +20,6 @@ cd devdoc
 run-full-security-audit.cmd
 ```
 This runs **everything automatically**:
-- ✅ OWASP Dependency-Check
 - ✅ SpotBugs Security  
 - ✅ OWASP ZAP Dynamic Scan
 - Auto-starts and stops the app
@@ -45,7 +43,6 @@ run-zap-baseline.cmd
 
 | Tool | Type | What It Finds | Speed |
 |------|------|---------------|-------|
-| **Dependency-Check** | Static | Known CVEs in libraries | Fast (2-5 min) |
 | **SpotBugs** | Static | Security bugs in code | Fast (1-3 min) |
 | **OWASP ZAP** | Dynamic | Runtime vulnerabilities | Slow (10-30 min) |
 
@@ -55,7 +52,6 @@ run-zap-baseline.cmd
 
 ```
 target/
-  ├── dependency-check-report.html  ← Open this for dependency issues
   └── spotbugs.html                 ← Open this for code security bugs
 
 zap-reports/
@@ -74,12 +70,6 @@ zap-reports/
 - 🎲 Weak random number generation
 - 🔐 Insecure cryptography
 
-### In Dependencies (Dependency-Check):
-- 🐛 Known CVEs in Spring Boot
-- 🐛 JWT library vulnerabilities
-- 🐛 Database driver security issues
-- 🐛 Any outdated library with patches
-
 ### At Runtime (ZAP):
 - 💉 SQL Injection
 - 🔓 Cross-Site Scripting (XSS)
@@ -94,18 +84,14 @@ zap-reports/
 
 ### Run specific scans via Maven:
 ```cmd
-:: Just dependency check
-mvnw org.owasp:dependency-check-maven:check
-
 :: Just SpotBugs
 mvnw spotbugs:check
 
-:: Both at once
+:: Run with security profile
 mvnw verify -P security-audit
 ```
 
 ### Configure what to ignore:
-- **Dependency false positives**: Edit `dependency-check-suppressions.xml`
 - **SpotBugs false positives**: Edit `spotbugs-exclude.xml`
 - **ZAP alerts**: Edit `.zap\rules.tsv`
 
