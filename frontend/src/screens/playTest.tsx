@@ -5,6 +5,7 @@ import { IoMdArrowBack } from "react-icons/io";
 import { FaFileAlt } from "react-icons/fa";
 import { useTestById } from '../hooks/useTests';
 import type { Question } from '../services/testService';
+import SafeText from '../components/SafeText';
 
 interface LocationState {
     showQuestions?: boolean;
@@ -105,7 +106,7 @@ const TestStartPage = () => {
                                         </span>
                                     </div>
                                     <p className={styles.questionPreviewText}>
-                                        {question.question}
+                                        <SafeText text={question.question} />
                                     </p>
                                     <div className={styles.optionsPreview}>
                                         {question.options.map((option, optIndex) => (
@@ -116,7 +117,9 @@ const TestStartPage = () => {
                                                 <span className={styles.optionPreviewLetter}>
                                                     {String.fromCharCode(65 + optIndex)}
                                                 </span>
-                                                <span className={styles.optionPreviewText}>{option}</span>
+                                                <span className={styles.optionPreviewText}>
+                                                    <SafeText text={option} />
+                                                </span>
                                             </div>
                                         ))}
                                     </div>

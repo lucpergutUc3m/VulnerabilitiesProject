@@ -4,6 +4,7 @@ import styles from '../css/testScreen.module.css';
 import { IoMdArrowBack } from "react-icons/io";
 import { MdNavigateBefore, MdNavigateNext } from "react-icons/md";
 import { useTestById } from '../hooks/useTests';
+import SafeText from '../components/SafeText';
 
 interface UserAnswers {
     [questionId: number]: number | null;
@@ -135,7 +136,7 @@ const TestScreen = () => {
                 <div className={styles.questionSection}>
                     <div className={styles.questionContainer}>
                         <h3 className={styles.questionText}>
-                            {currentQuestion.question}
+                            <SafeText text={currentQuestion.question} />
                         </h3>
 
                         {/* Opciones de respuesta */}
@@ -168,7 +169,9 @@ const TestScreen = () => {
                                         <span className={styles.optionLabel}>
                                             {String.fromCharCode(65 + index)}
                                         </span>
-                                        <span className={styles.optionText}>{option}</span>
+                                        <span className={styles.optionText}>
+                                            <SafeText text={option} />
+                                        </span>
                                     </button>
                                 );
                             })}
@@ -178,7 +181,9 @@ const TestScreen = () => {
                         {isAnswered && currentQuestion.explanation && (
                             <div className={styles.explanationBox}>
                                 <h4>Explanation:</h4>
-                                <p>{currentQuestion.explanation}</p>
+                                <p>
+                                    <SafeText text={currentQuestion.explanation} />
+                                </p>
                             </div>
                         )}
                     </div>

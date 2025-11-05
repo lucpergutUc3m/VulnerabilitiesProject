@@ -1,6 +1,27 @@
 import React, { useState, useRef } from 'react';
 import type { Test, Question } from '../services/testService';
 import styles from '../css/createTestModal.module.css';
+import { z } from 'zod';
+import DOMPurify from 'dompurify';
+
+// Constantes de validación
+const MAX_FILE_SIZE = 1024 * 1024; // 1MB
+const MAX_QUESTIONS = 100;
+const MAX_QUESTION_LENGTH = 500;
+const MAX_OPTION_LENGTH = 200;
+const MAX_OPTIONS = 10;
+const MIN_OPTIONS = 2;
+const MAX_EXPLANATION_LENGTH = 1000;
+
+// Schema de validación con Zod
+const questionSchema = z.object({
+  question: z.string().min(1, 'La pregunta no puede estar vacía').max(MAX_QUESTION_LENGTH, `La pregunta no puede exceder ${MAX_QUESTION_LENGTH} caracteres`),
+  options: z.array(z.string().min(1).max(MAX_OPTION_LENGTH)).min(MIN_OPTIONS, `Debe haber al menos ${MIN_OPTIONS} opciones`).max(MAX_OPTIONS, `No puede haber más de ${MAX_OPTIONS} opciones`),
+  correctAnswer: z.number().int().min(0, 'La respuesta correcta debe ser un número válido'),
+  explanation: z.string().max(MAX_EXPLANATION_LENGTH).optional(),
+});
+
+const questionsArraySchema = z.array(questionSchema).min(1).max(MAX_QUESTIONS);
 
 interface CreateTestModalProps {
   isOpen: boolean;
@@ -31,8 +52,17 @@ const CreateTestModal: React.FC<CreateTestModalProps> = ({ isOpen, onClose, onSu
       return;
     }
 
+    // Validar extensión
     if (!file.name.endsWith('.json')) {
       setError('Por favor, selecciona un archivo JSON válido');
+      setFileName('');
+      setQuestions([]);
+      return;
+    }
+
+    // Validar tamaño de archivo
+    if (file.size > MAX_FILE_SIZE) {
+      setError(`El archivo es demasiado grande. Tamaño máximo: ${MAX_FILE_SIZE / 1024 / 1024}MB`);
       setFileName('');
       setQuestions([]);
       return;
@@ -44,37 +74,65 @@ const CreateTestModal: React.FC<CreateTestModalProps> = ({ isOpen, onClose, onSu
     reader.onload = (event) => {
       try {
         const content = event.target?.result as string;
+        
+        // Validar longitud del contenido
+        if (content.length > MAX_FILE_SIZE) {
+          throw new Error('El contenido del archivo es demasiado grande');
+        }
+        
         const jsonData = JSON.parse(content);
         
-        // Validate the structure
-        if (!Array.isArray(jsonData)) {
-          throw new Error('El archivo debe contener un array de preguntas');
+        const validationResult = questionsArraySchema.safeParse(jsonData);
+        
+        if (!validationResult.success) {
+          const firstError = validationResult.error.issues[0];
+          throw new Error(`Error de validación: ${firstError.message} en ${firstError.path.join('.')}`);
         }
 
-        // Validate each question
-        const validatedQuestions: Omit<Question, 'id'>[] = jsonData.map((q, idx) => {
-          if (!q.question || typeof q.question !== 'string') {
-            throw new Error(`Pregunta ${idx + 1}: falta el campo 'question'`);
-          }
-          if (!Array.isArray(q.options) || q.options.length < 2) {
-            throw new Error(`Pregunta ${idx + 1}: 'options' debe ser un array con al menos 2 opciones`);
-          }
-          if (typeof q.correctAnswer !== 'number' || q.correctAnswer < 0 || q.correctAnswer >= q.options.length) {
-            throw new Error(`Pregunta ${idx + 1}: 'correctAnswer' debe ser un índice válido de las opciones`);
+        const validatedQuestions: Omit<Question, 'id'>[] = validationResult.data.map((q) => {
+          const sanitizedQuestion = DOMPurify.sanitize(q.question, {
+            ALLOWED_TAGS: [],
+            ALLOWED_ATTR: []
+          });
+          
+          const sanitizedOptions = q.options.map(opt => 
+            DOMPurify.sanitize(opt, {
+              ALLOWED_TAGS: [],
+              ALLOWED_ATTR: []
+            })
+          );
+          
+          const sanitizedExplanation = q.explanation 
+            ? DOMPurify.sanitize(q.explanation, {
+                ALLOWED_TAGS: [],
+                ALLOWED_ATTR: []
+              })
+            : '';
+          
+          if (q.correctAnswer >= sanitizedOptions.length) {
+            throw new Error(`Índice de respuesta correcta fuera de rango: ${q.correctAnswer}`);
           }
           
           return {
-            question: q.question,
-            options: q.options,
+            question: sanitizedQuestion,
+            options: sanitizedOptions,
             correctAnswer: q.correctAnswer,
-            explanation: q.explanation || '',
+            explanation: sanitizedExplanation,
           };
         });
 
         setQuestions(validatedQuestions);
         setError('');
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error al leer el archivo JSON');
+        let errorMessage = 'Error al leer el archivo JSON';
+        
+        if (err instanceof Error) {
+          errorMessage = err.message;
+        } else if (err instanceof SyntaxError) {
+          errorMessage = 'El archivo JSON tiene un formato inválido';
+        }
+        
+        setError(errorMessage);
         setQuestions([]);
         setFileName('');
       }

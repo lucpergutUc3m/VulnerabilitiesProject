@@ -6,6 +6,7 @@ import type { User } from '../types/auth';
 import styles from '../css/userProfile.module.css';
 import TestCardListAdmin from '@/components/testCardAdmin';
 import { FaHome, FaUserShield, FaUserLock, FaUser, FaClipboardList, FaFileAlt } from 'react-icons/fa';
+import { rateLimiter, RATE_LIMITS } from '../utils/rateLimiter';
 
 interface TestItem {
   id: number;
@@ -33,16 +34,12 @@ const UserProfile: React.FC = () => {
     const loadUser = () => {
       const user = authService.getUser();
       
-      console.log('🔍 Loading user:', user);
-      
       if (!user) {
-        console.error('❌ No user found, redirecting to login');
         setError('No user session found');
         navigate('/login', { replace: true });
         return;
       }
 
-      console.log('✅ User loaded successfully:', user.email, 'Role:', user.role);
       setUser(user);
       setEditedName(user.name);
       setIsLoading(false);
@@ -51,7 +48,7 @@ const UserProfile: React.FC = () => {
     loadUser();
   }, [navigate]);
 
-  // Segundo useEffect para cargar tests (admin o usuario)
+ 
   useEffect(() => {
     const fetchTests = async () => {
       if (!user) {
@@ -63,18 +60,11 @@ const UserProfile: React.FC = () => {
         const authHeader = authService.getAuthHeader();
         let endpoint = '';
         
-        // Si es admin, usar endpoint de admin
-        if (authService.isAdmin()) {
-          const payload = authService.getTokenPayload();
-          if (payload) {
-            console.log('Token payload:', payload);
-            console.log('Token authorities:', payload.authorities);
-            console.log('Token role:', payload.role);
-          }
-          
+     
+        if (authService.isAdminUI()) {
           endpoint = `${config.api.baseUrl}/admin/tests`;
         } else {
-          // Si es usuario normal, obtener sus tests
+        
           endpoint = `${config.api.baseUrl}/tests/user/${user.id}`;
         }
         
@@ -86,14 +76,9 @@ const UserProfile: React.FC = () => {
           }
         });
         
-        console.log('Tests response status:', response.status, response.statusText);
-        
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`Error ${response.status}: ${response.statusText}`, errorText);
-          // No establecer error general, solo log
-          console.warn('Could not load tests, but continuing...');
-          if (authService.isAdmin()) {
+          await response.text();
+          if (authService.isAdminUI()) {
             setAdminTests([]);
           } else {
             setUserTests([]);
@@ -102,17 +87,15 @@ const UserProfile: React.FC = () => {
         }
 
         const data = await response.json();
-        console.log('Tests data:', data);
         
-        if (authService.isAdmin()) {
+        if (authService.isAdminUI()) {
           setAdminTests(data);
         } else {
           setUserTests(data);
         }
-      } catch (e) {
-        console.error('Failed to fetch tests:', e);
-        // No establecer error general, solo establecer array vacío
-        if (authService.isAdmin()) {
+      } catch {
+
+        if (authService.isAdminUI()) {
           setAdminTests([]);
         } else {
           setUserTests([]);
@@ -123,16 +106,16 @@ const UserProfile: React.FC = () => {
     };
 
     fetchTests();
-  }, [user]); // Se ejecuta cuando user cambia
+  }, [user]); 
 
   const handleTestDeleted = () => {
-    // Recargar la lista de tests después de que uno se borre
+
     if (!user) return;
     
     const authHeader = authService.getAuthHeader();
     let endpoint = '';
     
-    if (authService.isAdmin()) {
+    if (authService.isAdminUI()) {
       endpoint = `${config.api.baseUrl}/admin/tests`;
     } else {
       endpoint = `${config.api.baseUrl}/tests/user/${user.id}`;
@@ -147,15 +130,14 @@ const UserProfile: React.FC = () => {
     })
       .then(response => response.json())
       .then(data => {
-        console.log('Tests reloaded after deletion:', data);
-        if (authService.isAdmin()) {
+        if (authService.isAdminUI()) {
           setAdminTests(data);
         } else {
           setUserTests(data);
         }
       })
-      .catch(e => {
-        console.error('Failed to reload tests:', e);
+      .catch(() => {
+        // Fail silently
       });
   };
 
@@ -167,6 +149,12 @@ const UserProfile: React.FC = () => {
   const handleUpdateProfile = async () => {
     if (!user || !editedName.trim()) {
       setError('Name cannot be empty');
+      return;
+    }
+
+    if (!rateLimiter.canProceed('updateProfile', RATE_LIMITS.UPDATE_PROFILE)) {
+      const blockedTime = Math.ceil(rateLimiter.getBlockedTimeRemaining('updateProfile') / 1000);
+      setError(`Too many update attempts. Please try again in ${blockedTime} seconds.`);
       return;
     }
 
@@ -192,11 +180,12 @@ const UserProfile: React.FC = () => {
       }
 
       const updatedUser = { ...user, name: editedName };
-      // Update localStorage
       localStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
       setIsEditing(false);
       setError('');
+      
+      rateLimiter.reset('updateProfile');
     } catch (e) {
       if (e instanceof Error) {
         setError(e.message);
@@ -207,7 +196,6 @@ const UserProfile: React.FC = () => {
   };
 
   if (isLoading) {
-    console.log('⏳ Profile is loading...');
     return (
       <div className={styles.userProfilePage}>
         <div className={styles.background}>
@@ -224,8 +212,6 @@ const UserProfile: React.FC = () => {
       </div>
     );
   }
-
-  console.log('✅ Rendering profile for user:', user?.email, 'Role:', user?.role);
 
   return (
     <div className={styles.userProfilePage}>

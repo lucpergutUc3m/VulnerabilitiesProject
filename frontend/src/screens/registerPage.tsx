@@ -16,14 +16,7 @@ const RegisterPage: React.FC = () => {
     setAuthErrorMessage('');
 
     try {
-      // Log configuration for debugging
-      if (config.app.debug) {
-        console.log('API Base URL:', config.api.baseUrl);
-        console.log('App Name:', config.app.name);
-        console.log('Environment:', config.app.environment);
-      }
-      
-      // Make real API call to backend
+ 
       const response = await fetch(`${config.api.baseUrl}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -39,14 +32,14 @@ const RegisterPage: React.FC = () => {
         throw new Error(errorData.message || `Registration failed with status: ${response.status}`);
       }
 
-      // Parse the response
+
       const authResponse: RegisterResponse = await response.json();
 
-      // Save auth data to localStorage
+
       localStorage.setItem('authToken', authResponse.token);
       localStorage.setItem('user', JSON.stringify(authResponse.user));
 
-      // Redirect to home page
+
       navigate('/', { replace: true });
       
     } catch (error) {
@@ -55,7 +48,6 @@ const RegisterPage: React.FC = () => {
       } else {
         setAuthErrorMessage('Registration failed. Please try again.');
       }
-      console.error('Registration error:', error);
     } finally {
       setIsAuthLoading(false);
     }

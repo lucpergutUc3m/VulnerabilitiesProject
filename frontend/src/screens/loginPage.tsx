@@ -12,7 +12,7 @@ const LoginPage: React.FC = () => {
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [authErrorMessage, setAuthErrorMessage] = useState<string>('');
 
-  // Get the page to redirect to after login
+
   const redirectPathAfterLogin = (location.state as { from?: { pathname: string } } | null)?.from?.pathname || '/';
 
   const handleLoginAttempt = async (formData: LoginFormData) => {
@@ -20,10 +20,10 @@ const LoginPage: React.FC = () => {
     setAuthErrorMessage('');
 
     try {
-      // Use auth service to login
+
       await authService.login(formData.email, formData.password);
       
-      // Redirect to previous page or home
+
       navigate(redirectPathAfterLogin, { replace: true });
       
     } catch (error) {
@@ -32,7 +32,6 @@ const LoginPage: React.FC = () => {
       } else {
         setAuthErrorMessage('Invalid credentials. Please verify your email and password.');
       }
-      console.error('Login error:', error);
     } finally {
       setIsAuthLoading(false);
     }

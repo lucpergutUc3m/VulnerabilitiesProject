@@ -74,12 +74,17 @@ const TestCardAdmin = ({
             const token = authService.getToken();
             
             if (!token) {
-                console.error('No authentication token found');
                 setShowDeleteModal(false);
                 return;
             }
 
-            const response = await fetch(`http://localhost:8080/api/admin/tests/${test.id}`, {
+            // Use admin route if user is admin, otherwise use regular user route
+            const isAdmin = authService.isAdminUI();
+            const endpoint = isAdmin 
+                ? `http://localhost:8080/api/admin/tests/${test.id}`
+                : `http://localhost:8080/api/tests/${test.id}`;
+
+            const response = await fetch(endpoint, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -88,21 +93,17 @@ const TestCardAdmin = ({
             });
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                console.error('Failed to delete test:', errorData);
+                await response.json().catch(() => ({})); 
                 setShowDeleteModal(false);
                 return;
             }
 
-            console.log('Test deleted successfully:', test.id);
             setShowDeleteModal(false);
             
-            // Llamar al callback para recargar la lista
             if (onTestDeleted) {
                 onTestDeleted();
             }
-        } catch (error) {
-            console.error('Error deleting test:', error);
+        } catch {
             setShowDeleteModal(false);
         }
     };

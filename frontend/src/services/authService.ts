@@ -1,11 +1,7 @@
-/**
- * Centralized Authentication Service
- * Manages all token and user data in localStorage
- * Provides a single source of truth for auth state
- */
-
 import type { User, AuthResponse } from '../types/auth';
 import { config } from '@env';
+import { rateLimiter, RATE_LIMITS } from '../utils/rateLimiter';
+import logger from '../utils/logger';
 
 const STORAGE_KEYS = {
   TOKEN: 'authToken',
@@ -13,33 +9,23 @@ const STORAGE_KEYS = {
   TOKEN_EXPIRY: 'tokenExpiry',
 } as const;
 
-/**
- * Decodes JWT payload without verification (for display purposes only)
- * Never trust this for security - always verify on backend
- */
 function decodeToken(token: string): Record<string, unknown> | null {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) {
-      console.error('Invalid token format: expected 3 parts');
       return null;
     }
     
-    // Add padding if needed
     const payload = parts[1];
     const padded = payload + '='.repeat((4 - (payload.length % 4)) % 4);
     
     const decoded = JSON.parse(atob(padded));
     return decoded;
-  } catch (error) {
-    console.error('Failed to decode token:', error);
+  } catch {
     return null;
   }
 }
 
-/**
- * Check if token is expired
- */
 function isTokenExpired(token: string): boolean {
   try {
     const payload = decodeToken(token);
@@ -47,11 +33,8 @@ function isTokenExpired(token: string): boolean {
       return true;
     }
     
-    // exp is in seconds, convert to milliseconds
     const expiryTime = payload.exp * 1000;
     const now = Date.now();
-    
-    // Consider expired if less than 1 minute remaining
     const bufferTime = 60 * 1000;
     return now > (expiryTime - bufferTime);
   } catch {
@@ -59,9 +42,6 @@ function isTokenExpired(token: string): boolean {
   }
 }
 
-/**
- * Get token from localStorage
- */
 export function getToken(): string | null {
   const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
   
@@ -69,9 +49,7 @@ export function getToken(): string | null {
     return null;
   }
   
-  // Check if expired
   if (isTokenExpired(token)) {
-    console.warn('Token is expired, clearing storage');
     clearAuth();
     return null;
   }
@@ -79,9 +57,6 @@ export function getToken(): string | null {
   return token;
 }
 
-/**
- * Get current user from localStorage
- */
 export function getUser(): User | null {
   try {
     const userStr = localStorage.getItem(STORAGE_KEYS.USER);
@@ -89,16 +64,12 @@ export function getUser(): User | null {
       return null;
     }
     return JSON.parse(userStr);
-  } catch (error) {
-    console.error('Failed to parse user data:', error);
+  } catch {
     clearAuth();
     return null;
   }
 }
 
-/**
- * Get token payload (for debugging/display)
- */
 export function getTokenPayload(): Record<string, unknown> | null {
   const token = getToken();
   if (!token) {
@@ -107,101 +78,59 @@ export function getTokenPayload(): Record<string, unknown> | null {
   return decodeToken(token);
 }
 
-/**
- * Save authentication data to localStorage
- */
 export function saveAuth(authResponse: AuthResponse): void {
-  try {
-    // Validate response
-    if (!authResponse.token || !authResponse.user) {
-      throw new Error('Invalid auth response: missing token or user');
-    }
-    
-    // Verify token format
-    const payload = decodeToken(authResponse.token);
-    if (!payload) {
-      throw new Error('Invalid token format');
-    }
-    
-    // Check required claims
-    if (!payload.authorities || !Array.isArray(payload.authorities)) {
-      console.warn('Warning: Token missing authorities claim');
-    }
-    
-    if (payload.role !== authResponse.user.role) {
-      console.warn('Warning: Token role does not match user role');
-      console.warn('  Token role:', payload.role);
-      console.warn('  User role:', authResponse.user.role);
-    }
-    
-    // Save to localStorage
-    localStorage.setItem(STORAGE_KEYS.TOKEN, authResponse.token);
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(authResponse.user));
-    
-    // Calculate and save expiry time
-    if (typeof payload.exp === 'number') {
-      localStorage.setItem(STORAGE_KEYS.TOKEN_EXPIRY, (payload.exp * 1000).toString());
-    }
-    
-    console.log('✅ Auth data saved successfully');
-    console.log('User:', authResponse.user);
-    console.log('Token authorities:', payload.authorities);
-  } catch (error) {
-    console.error('Failed to save auth data:', error);
-    throw error;
+  if (!authResponse.token || !authResponse.user) {
+    throw new Error('Invalid auth response: missing token or user');
+  }
+  
+  const payload = decodeToken(authResponse.token);
+  if (!payload) {
+    throw new Error('Invalid token format');
+  }
+  
+  if (!payload.authorities || !Array.isArray(payload.authorities)) {
+    logger.warn('Warning: Token missing authorities claim');
+  }
+  
+  if (payload.role !== authResponse.user.role) {
+    logger.warn('Warning: Token role does not match user role');
+  }
+  
+  localStorage.setItem(STORAGE_KEYS.TOKEN, authResponse.token);
+  localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(authResponse.user));
+  
+  if (typeof payload.exp === 'number') {
+    localStorage.setItem(STORAGE_KEYS.TOKEN_EXPIRY, (payload.exp * 1000).toString());
   }
 }
 
-/**
- * Clear all authentication data
- */
 export function clearAuth(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEYS.TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USER);
-    localStorage.removeItem(STORAGE_KEYS.TOKEN_EXPIRY);
-    console.log('✅ Auth data cleared');
-  } catch (error) {
-    console.error('Failed to clear auth data:', error);
-  }
+  localStorage.removeItem(STORAGE_KEYS.TOKEN);
+  localStorage.removeItem(STORAGE_KEYS.USER);
+  localStorage.removeItem(STORAGE_KEYS.TOKEN_EXPIRY);
 }
 
-/**
- * Check if user is authenticated
- */
 export function isAuthenticated(): boolean {
   const token = getToken();
   const user = getUser();
   return !!token && !!user;
 }
 
-/**
- * Check if current user is admin (role === 1)
- */
-export function isAdmin(): boolean {
+export function isAdminUI(): boolean {
   const user = getUser();
   return user?.role === 1;
 }
 
-/**
- * Check if current user is superuser (role === 2)
- */
 export function isSuperuser(): boolean {
   const user = getUser();
   return user?.role === 2;
 }
 
-/**
- * Check if user has specific role
- */
 export function hasRole(role: number): boolean {
   const user = getUser();
   return user?.role === role;
 }
 
-/**
- * Check if token has specific authority
- */
 export function hasAuthority(authority: string): boolean {
   const payload = getTokenPayload();
   if (!payload || !payload.authorities) {
@@ -210,15 +139,14 @@ export function hasAuthority(authority: string): boolean {
   return Array.isArray(payload.authorities) && payload.authorities.includes(authority);
 }
 
-/**
- * Login - fetch token from backend
- */
 export async function login(email: string, password: string): Promise<AuthResponse> {
+  if (!rateLimiter.canProceed('login', RATE_LIMITS.LOGIN)) {
+    const blockedTime = Math.ceil(rateLimiter.getBlockedTimeRemaining('login') / 1000);
+    throw new Error(`Too many login attempts. Please try again in ${blockedTime} seconds.`);
+  }
+
   try {
     const url = `${config.api.baseUrl}/auth/login`;
-    console.log('🔐 Login attempting...');
-    console.log('   URL:', url);
-    console.log('   Email:', email);
     
     const response = await fetch(url, {
       method: 'POST',
@@ -227,21 +155,13 @@ export async function login(email: string, password: string): Promise<AuthRespon
       credentials: 'include'
     });
 
-    console.log('📡 Response received');
-    console.log('   Status:', response.status);
-    console.log('   StatusText:', response.statusText);
-    console.log('   Content-Type:', response.headers.get('content-type'));
-
     if (!response.ok) {
       let errorMessage = 'Login failed';
-      let responseBody = '';
       try {
-        responseBody = await response.text();
-        console.error('❌ Response body (raw):', responseBody);
+        const responseBody = await response.text();
         try {
           const errorData = JSON.parse(responseBody);
           errorMessage = errorData.message || errorData.error || errorData.msg || responseBody;
-          console.error('❌ Backend error (parsed):', errorData);
         } catch {
           errorMessage = responseBody || `HTTP ${response.status}`;
         }
@@ -252,25 +172,23 @@ export async function login(email: string, password: string): Promise<AuthRespon
     }
 
     const authResponse: AuthResponse = await response.json();
-    console.log('✅ Login successful');
-    console.log('   User:', authResponse.user);
-    console.log('   Token expires in:', authResponse.expiresIn);
     
-    // Save to localStorage
+    rateLimiter.reset('login');
     saveAuth(authResponse);
     
     return authResponse;
   } catch (error) {
-    console.error('❌ Login error:', error);
     clearAuth();
     throw error;
   }
 }
 
-/**
- * Register - create new account
- */
 export async function register(email: string, name: string, password: string): Promise<AuthResponse> {
+  if (!rateLimiter.canProceed('register', RATE_LIMITS.REGISTER)) {
+    const blockedTime = Math.ceil(rateLimiter.getBlockedTimeRemaining('register') / 1000);
+    throw new Error(`Too many registration attempts. Please try again in ${blockedTime} seconds.`);
+  }
+
   try {
     const response = await fetch(`${config.api.baseUrl}/auth/register`, {
       method: 'POST',
@@ -285,49 +203,48 @@ export async function register(email: string, name: string, password: string): P
 
     const authResponse: AuthResponse = await response.json();
     
-    // Save to localStorage
+    rateLimiter.reset('register');
     saveAuth(authResponse);
     
     return authResponse;
   } catch (error) {
-    console.error('Registration failed:', error);
     clearAuth();
     throw error;
   }
 }
 
-/**
- * Logout - clear auth and invalidate token on backend
- */
 export async function logout(): Promise<void> {
   try {
     const token = getToken();
     
-    // Try to invalidate token on backend
     if (token) {
       try {
-        await fetch(`${config.api.baseUrl}/auth/logout`, {
+        const response = await fetch(`${config.api.baseUrl}/auth/logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
-        }).catch(() => {
-          // Logout endpoint might not exist, ignore errors
         });
+        
+        if (!response.ok) {
+          logger.warn(
+            'Backend logout failed. Session cleared locally but may still be valid on server.',
+            `Status: ${response.status}`
+          );
+        }
       } catch (error) {
-        console.warn('Failed to logout from backend:', error);
+        logger.warn(
+          'Could not reach logout endpoint. Session cleared locally but may still be valid on server.',
+          error
+        );
       }
     }
   } finally {
-    // Always clear local storage
     clearAuth();
   }
 }
 
-/**
- * Get authorization header for API calls
- */
 export function getAuthHeader(): Record<string, string> {
   const token = getToken();
   if (!token) {
@@ -336,40 +253,35 @@ export function getAuthHeader(): Record<string, string> {
   return { Authorization: `Bearer ${token}` };
 }
 
-/**
- * Debug function: Log all auth info to console
- */
 export function debugAuth(): void {
-  console.group('🔐 Auth Debug Info');
+  if (!import.meta.env.DEV) return;
+  
+  logger.group('🔐 Auth Debug Info');
   
   const user = getUser();
   const token = getToken();
   const payload = getTokenPayload();
   const isAuth = isAuthenticated();
-  const adminCheck = isAdmin();
+  const adminCheck = isAdminUI();
   
-  console.log('Authenticated:', isAuth);
-  console.log('Current User:', user);
-  console.log('Is Admin:', adminCheck);
-  console.log('Token (first 50 chars):', token?.substring(0, 50) + '...');
-  console.log('Token Payload:', payload);
+  logger.log('Authenticated:', isAuth);
+  logger.log('Current User:', user);
+  logger.log('Is Admin:', adminCheck);
+  logger.log('Token (first 50 chars):', token?.substring(0, 50) + '...');
+  logger.log('Token Payload:', payload);
   
   if (payload) {
-    console.log('  - Authorities:', payload.authorities);
-    console.log('  - Role:', payload.role);
-    console.log('  - UserId:', payload.userId);
+    logger.log('  - Authorities:', payload.authorities);
+    logger.log('  - Role:', payload.role);
+    logger.log('  - UserId:', payload.userId);
     if (typeof payload.exp === 'number') {
-      console.log('  - Expires:', new Date(payload.exp * 1000).toLocaleString());
+      logger.log('  - Expires:', new Date(payload.exp * 1000).toLocaleString());
     }
   }
   
-  console.groupEnd();
+  logger.groupEnd();
 }
 
-/**
- * Validate auth state consistency
- * Returns warnings if there are inconsistencies
- */
 export function validateAuthState(): string[] {
   const warnings: string[] = [];
   
@@ -380,22 +292,18 @@ export function validateAuthState(): string[] {
     return warnings;
   }
   
-  // Check role consistency
   if (payload.role !== user.role) {
     warnings.push(`Role mismatch: token=${payload.role}, user=${user.role}`);
   }
   
-  // Check userId consistency
   if (payload.userId !== user.id) {
     warnings.push(`UserId mismatch: token=${payload.userId}, user=${user.id}`);
   }
   
-  // Check email consistency
   if (payload.sub !== user.email) {
     warnings.push(`Email mismatch: token=${payload.sub}, user=${user.email}`);
   }
   
-  // Check authorities format
   if (!payload.authorities || !Array.isArray(payload.authorities)) {
     warnings.push('Token missing or invalid authorities claim');
   }
@@ -410,7 +318,7 @@ export default {
   saveAuth,
   clearAuth,
   isAuthenticated,
-  isAdmin,
+  isAdminUI,
   isSuperuser,
   hasRole,
   hasAuthority,

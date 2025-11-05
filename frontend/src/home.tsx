@@ -24,13 +24,13 @@ const Home: React.FC = () => {
       try {
         const userData = JSON.parse(storedUserData);
         setCurrentUser(userData);
-      } catch (error) {
-        console.error('Failed to parse user data:', error);
+      } catch {
+        setCurrentUser(null);
       }
     }
   }, []);
 
-  // Refetch tests when user logs in (only once)
+
   useEffect(() => {
     if (currentUser && localStorage.getItem('authToken') && !hasLoadedTests) {
       refetch();
@@ -49,14 +49,13 @@ const Home: React.FC = () => {
     await fetch(`${config.api.baseUrl}/auth/logout`, { method: 'POST' });
 
     setCurrentUser(null);
-    setHasLoadedTests(false); // Reset loaded tests on logout
+    setHasLoadedTests(false); 
 
     navigate('/');
   };
 
-  const handleEmojiChange = (testId: number, newEmoji: string) => {
-    console.log(`Test ${testId} changed to emoji: ${newEmoji}`);
-    // Here you can update state or make an API call
+  const handleEmojiChange = () => {
+    // Placeholder for future implementation
   };
 
   const handleAddQuestion = () => {
@@ -67,19 +66,15 @@ const Home: React.FC = () => {
     try {
       setSubmitError('');
       await testService.createTest(testData);
-      
-      // Refresh tests list
       await refetch();
-      
       setIsModalOpen(false);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error creating test';
       setSubmitError(errorMessage);
-      throw err; // Re-throw so modal can also handle the error
     }
   };
 
-  // Format welcome message based on time of day
+
   const getWelcomeMessage = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';

@@ -21,7 +21,7 @@ const TestResults = () => {
     const correctAnswers = state?.correctAnswers ?? 0;
     const totalQuestions = state?.totalQuestions ?? 0;
 
-    // Determinar baremo según el porcentaje
+    
     const getBaremo = (percentage: number) => {
         if (percentage >= 80) {
             return {
