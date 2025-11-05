@@ -54,3 +54,4 @@ coverage/
 *.tsbuildinfo
 .turbo/
 dist-ssr/
+vulnerable-app.tar.gz

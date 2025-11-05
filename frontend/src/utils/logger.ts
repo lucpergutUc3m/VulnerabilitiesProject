@@ -1,24 +1,19 @@
-const isDev = import.meta.env.DEV;
+// En producción, NUNCA mostrar nada en consola
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const noop = (..._args: unknown[]) => {};
 
 export const logger = {
-  log: isDev ? console.log.bind(console) : () => {},
-  error: isDev ? console.error.bind(console) : () => {},
-  warn: isDev ? console.warn.bind(console) : () => {},
-  info: isDev ? console.info.bind(console) : () => {},
-  debug: isDev ? console.debug.bind(console) : () => {},
-  group: isDev ? console.group.bind(console) : () => {},
-  groupEnd: isDev ? console.groupEnd.bind(console) : () => {},
+  log: noop,
+  error: noop,
+  warn: noop,
+  info: noop,
+  debug: noop,
+  group: noop,
+  groupEnd: noop,
 };
 
 export const persistentLogger = {
-  error: (message: string, ...args: unknown[]) => {
-    const sanitizedArgs = args.map(arg => {
-      if (typeof arg === 'object') return '[Object]';
-      if (typeof arg === 'string' && arg.length > 100) return arg.substring(0, 100) + '...';
-      return arg;
-    });
-    console.error(message, ...sanitizedArgs);
-  }
+  error: noop,
 };
 
 export default logger;

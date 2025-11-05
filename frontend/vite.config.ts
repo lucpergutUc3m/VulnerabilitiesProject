@@ -20,7 +20,8 @@ export default defineConfig({
     },
   },
   build: {
-    minify: 'terser',
+    minify: 'esbuild', // Usar esbuild en lugar de terser para evitar problemas
+    sourcemap: false,
   },
   server: {
     // Configurar headers de seguridad en desarrollo

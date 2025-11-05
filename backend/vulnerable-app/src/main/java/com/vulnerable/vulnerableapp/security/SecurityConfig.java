@@ -41,11 +41,16 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints
+                // Public endpoints - API
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/categories").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/db-console.html").permitAll()
+                
+                // Static resources (frontend) and SPA routes
+                .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
+                .requestMatchers("/static/**", "/assets/**", "/*.js", "/*.css", "/*.json", "/*.svg").permitAll()
+                .requestMatchers("/login", "/register", "/user", "/test/**").permitAll()
                 
                 // Admin endpoints
                 .requestMatchers("/api/admin/**").hasRole(UserRoles.ADMIN.getName())
@@ -53,7 +58,7 @@ public class SecurityConfig {
                 // Authenticated endpoints
                 .requestMatchers("/api/**").authenticated()
                 
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider())
