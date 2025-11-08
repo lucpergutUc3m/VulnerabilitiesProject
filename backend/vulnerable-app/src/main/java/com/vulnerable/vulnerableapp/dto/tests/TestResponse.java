@@ -23,4 +23,7 @@ public class TestResponse {
     private Integer timeLimit;
     private String createdBy;
     private Boolean isPublic;
+    private Double averageRating;
+    private Integer ratingCount;
+    private Integer userRating; // Current user's rating (null if not rated, most recent if TOCTOU created duplicates)
 }

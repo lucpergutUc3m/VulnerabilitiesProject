@@ -19,4 +19,6 @@ public interface TestEntityRepository extends JpaRepository<TestEntity, Long> {
     
     // Find only public tests
     List<TestEntity> findByIsPublicTrue();
+    
+    List<TestEntity> findByIsPublicTrueAndOwnerIdNot(Long ownerIdToExclude);
 }

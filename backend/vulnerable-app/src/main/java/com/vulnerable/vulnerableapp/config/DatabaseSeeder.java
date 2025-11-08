@@ -3,8 +3,10 @@ package com.vulnerable.vulnerableapp.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vulnerable.vulnerableapp.entity.AppUser;
 import com.vulnerable.vulnerableapp.entity.TestEntity;
+import com.vulnerable.vulnerableapp.entity.TestRating;
 import com.vulnerable.vulnerableapp.repository.AppUserRepository;
 import com.vulnerable.vulnerableapp.repository.TestEntityRepository;
+import com.vulnerable.vulnerableapp.repository.TestRatingRepository;
 import com.vulnerable.vulnerableapp.utils.UserRoles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     
     private final AppUserRepository userRepository;
     private final TestEntityRepository testRepository;
+    private final TestRatingRepository testRatingRepository;
     private final PasswordEncoder passwordEncoder;
     private final ObjectMapper objectMapper = new ObjectMapper();
     
@@ -47,6 +50,11 @@ public class DatabaseSeeder implements CommandLineRunner {
         List<TestEntity> tests = createTests(users);
         testRepository.saveAll(tests);
         log.info("✅ {} tests created", tests.size());
+        
+        // Create ratings for public tests
+        List<TestRating> ratings = createRatings(tests, users);
+        testRatingRepository.saveAll(ratings);
+        log.info("✅ {} ratings created", ratings.size());
         
         log.info("✅ Database seeding completed!");
         logCredentials();
@@ -324,6 +332,58 @@ public class DatabaseSeeder implements CommandLineRunner {
         }
 
         return tests;
+    }
+    
+    private List<TestRating> createRatings(List<TestEntity> tests, List<AppUser> users) {
+        List<TestRating> ratings = new ArrayList<>();
+        
+        // Get only public tests
+        List<TestEntity> publicTests = tests.stream()
+                .filter(TestEntity::getIsPublic)
+                .toList();
+        
+        log.info("📊 Creating ratings for {} public tests...", publicTests.size());
+        
+        // For each public test, add ratings from users who are NOT the owner
+        for (TestEntity test : publicTests) {
+            log.info("  Rating test: '{}' (owner ID: {})", test.getTitle(), test.getOwnerId());
+            
+            for (AppUser user : users) {
+                // Skip if user is the owner of the test
+                if (user.getId().equals(test.getOwnerId())) {
+                    log.debug("    ⏭️  Skipping {} (owner cannot rate their own test)", user.getName());
+                    continue;
+                }
+                
+                // Create a random rating between 3-5 for most users (simulate realistic ratings)
+                // Some users rate 1-2 for variety
+                int rating;
+                Random random = new Random(user.getId() + test.getId()); // Deterministic but varied
+                double randomValue = random.nextDouble();
+                
+                // 70% chance of good rating (4-5), 20% medium (3), 10% poor (1-2)
+                if (randomValue < 0.7) {
+                    rating = random.nextInt(2) + 4; // 4 or 5
+                } else if (randomValue < 0.9) {
+                    rating = 3;
+                } else {
+                    rating = random.nextInt(2) + 1; // 1 or 2
+                }
+                
+                // Not all users rate all tests - 70% chance to rate
+                if (random.nextDouble() > 0.3) {
+                    TestRating testRating = TestRating.builder()
+                            .userId(user.getId())
+                            .testId(test.getId())
+                            .rating(rating)
+                            .build();
+                    ratings.add(testRating);
+                    log.debug("    ⭐ {} rated {}/5", user.getName(), rating);
+                }
+            }
+        }
+        
+        return ratings;
     }
     
     private void logCredentials() {

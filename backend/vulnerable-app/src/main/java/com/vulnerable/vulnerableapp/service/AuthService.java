@@ -8,6 +8,7 @@ import com.vulnerable.vulnerableapp.entity.AppUser;
 import com.vulnerable.vulnerableapp.repository.AppUserRepository;
 import com.vulnerable.vulnerableapp.security.JwtUtil;
 import com.vulnerable.vulnerableapp.security.TokenBlacklist;
+import com.vulnerable.vulnerableapp.util.XssUtils;
 import com.vulnerable.vulnerableapp.utils.UserRoles;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -40,9 +41,12 @@ public class AuthService {
         
         log.info("✓ Email is available, creating new user...");
         
+        // Sanitize name to prevent XSS attacks
+        String sanitizedName = XssUtils.sanitizeWithLimit(request.getName(), 100);
+        
         AppUser user = AppUser.builder()
                 .email(request.getEmail())
-                .name(request.getName())
+                .name(sanitizedName)
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(UserRoles.USER.getValue()) // Normal user by default
                 .build();
@@ -51,8 +55,7 @@ public class AuthService {
         log.info("✓ User saved to database with ID: {}", user.getId());
         
         String token = jwtUtil.generateToken(user);
-        String refreshToken = jwtUtil.generateRefreshToken(user);
-        log.info("✓ Tokens generated");
+        log.info("✓ Token generated");
         
         log.info("✅ REGISTRATION SUCCESSFUL for user: {}", request.getEmail());
         log.info("=== REGISTRATION REQUEST END ===");
@@ -66,8 +69,6 @@ public class AuthService {
                         .build())
                 .token(token)
                 .expiresIn(jwtUtil.getExpirationTime())
-                .refreshToken(refreshToken)
-                .refreshExpiresIn(jwtUtil.getRefreshExpirationTime())
                 .build();
     }
     
@@ -96,8 +97,7 @@ public class AuthService {
         log.info("✓ User found in database: {} (ID: {})", user.getName(), user.getId());
         
         String token = jwtUtil.generateToken(user);
-        String refreshToken = jwtUtil.generateRefreshToken(user);
-        log.info("✓ Tokens generated");
+        log.info("✓ Token generated");
         
         log.info("✅ LOGIN SUCCESSFUL for user: {}", request.getEmail());
         log.info("=== LOGIN REQUEST END ===");
@@ -111,8 +111,6 @@ public class AuthService {
                         .build())
                 .token(token)
                 .expiresIn(jwtUtil.getExpirationTime())
-                .refreshToken(refreshToken)
-                .refreshExpiresIn(jwtUtil.getRefreshExpirationTime())
                 .build();
     }
     
@@ -133,51 +131,5 @@ public class AuthService {
         
         log.info("✅ LOGOUT SUCCESSFUL");
         log.info("=== LOGOUT REQUEST END ===");
-    }
-    
-    public AuthResponse refreshToken(String refreshTokenString) {
-        log.info("=== REFRESH TOKEN REQUEST START ===");
-        
-        try {
-            // Extract username from refresh token
-            String username = jwtUtil.extractUsername(refreshTokenString);
-            log.info("✓ Extracted username from refresh token: {}", username);
-            
-            // Load user from database
-            AppUser user = userRepository.findByEmail(username)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            log.info("✓ User loaded: {} (ID: {})", user.getEmail(), user.getId());
-            
-            // Validate refresh token
-            if (!jwtUtil.validateRefreshToken(refreshTokenString, user)) {
-                log.error("❌ Invalid or expired refresh token");
-                throw new RuntimeException("Invalid or expired refresh token");
-            }
-            log.info("✓ Refresh token validated");
-            
-            // Generate new tokens
-            String newAccessToken = jwtUtil.generateToken(user);
-            String newRefreshToken = jwtUtil.generateRefreshToken(user);
-            log.info("✓ New tokens generated");
-            
-            log.info("✅ TOKEN REFRESH SUCCESSFUL for user: {}", user.getEmail());
-            log.info("=== REFRESH TOKEN REQUEST END ===");
-            
-            return AuthResponse.builder()
-                    .user(UserResponse.builder()
-                            .id(user.getId())
-                            .name(user.getName())
-                            .email(user.getEmail())
-                            .role(user.getRole())
-                            .build())
-                    .token(newAccessToken)
-                    .expiresIn(jwtUtil.getExpirationTime())
-                    .refreshToken(newRefreshToken)
-                    .refreshExpiresIn(jwtUtil.getRefreshExpirationTime())
-                    .build();
-        } catch (Exception e) {
-            log.error("❌ TOKEN REFRESH FAILED: {}", e.getMessage());
-            throw new RuntimeException("Failed to refresh token: " + e.getMessage());
-        }
     }
 }

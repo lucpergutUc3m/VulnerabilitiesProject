@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import type { Test, Question } from '../services/testService';
 import styles from '../css/createTestModal.module.css';
 import { z } from 'zod';
-import DOMPurify from 'dompurify';
 
 // Constantes de validación
 const MAX_FILE_SIZE = 1024 * 1024; // 1MB
@@ -90,34 +89,15 @@ const CreateTestModal: React.FC<CreateTestModalProps> = ({ isOpen, onClose, onSu
         }
 
         const validatedQuestions: Omit<Question, 'id'>[] = validationResult.data.map((q) => {
-          const sanitizedQuestion = DOMPurify.sanitize(q.question, {
-            ALLOWED_TAGS: [],
-            ALLOWED_ATTR: []
-          });
-          
-          const sanitizedOptions = q.options.map(opt => 
-            DOMPurify.sanitize(opt, {
-              ALLOWED_TAGS: [],
-              ALLOWED_ATTR: []
-            })
-          );
-          
-          const sanitizedExplanation = q.explanation 
-            ? DOMPurify.sanitize(q.explanation, {
-                ALLOWED_TAGS: [],
-                ALLOWED_ATTR: []
-              })
-            : '';
-          
-          if (q.correctAnswer >= sanitizedOptions.length) {
+          if (q.correctAnswer >= q.options.length) {
             throw new Error(`Índice de respuesta correcta fuera de rango: ${q.correctAnswer}`);
           }
           
           return {
-            question: sanitizedQuestion,
-            options: sanitizedOptions,
+            question: q.question,
+            options: q.options,
             correctAnswer: q.correctAnswer,
-            explanation: sanitizedExplanation,
+            explanation: q.explanation || '',
           };
         });
 

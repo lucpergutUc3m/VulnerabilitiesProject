@@ -30,9 +30,6 @@ public class TestEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
     
-    @Column(name = "questions_json", columnDefinition = "TEXT")
-    private String questionsJson;
-    
     @Column(name = "time_limit_minutes")
     private Integer timeLimitMinutes;
     
@@ -42,4 +39,7 @@ public class TestEntity {
     @Column(name = "public", nullable = false)
     @Builder.Default
     private Boolean isPublic = false;
+    
+    @Column(name = "questions_json", columnDefinition = "TEXT")
+    private String questionsJson;
 }

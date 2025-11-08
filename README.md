@@ -4,7 +4,24 @@ Full-stack test application with React (Vite) and Spring Boot, containerized wit
 
 ## Quick Start
 
-**Prerequisites:** Docker running on your system, port 8080 available.
+**Prerequisites:** Docker running on your system, ports 8080 and 5432 available.
+
+### Production with Docker Compose (PostgreSQL)
+
+```bash
+# Build and start all services
+docker compose up -d --build
+
+# Check status
+docker compose ps
+
+# View logs
+docker compose logs -f app
+
+# Access at http://localhost:8080
+```
+
+### Single Container (H2 Database)
 
 ```bash
 # Build and run
@@ -44,7 +61,58 @@ The application automatically builds frontend, backend, seeds database, and star
 
 Frontend is served by Spring Boot from `/static`, no CORS issues, single deployable artifact.
 
+## Database Access
+
+### PostgreSQL with Adminer (Docker Compose)
+
+Access database UI at **http://localhost:8081** (requires dev profile):
+
+```bash
+# Start Adminer web interface
+docker compose --profile dev up -d
+```
+
+**Login Credentials:**
+- **System:** `PostgreSQL`
+- **Server:** `postgres`
+- **Username:** `dbuser`
+- **Password:** `dbpassword`
+- **Database:** `vulnerableappdb`
+
+### Command Line Access
+
+```bash
+# Connect to PostgreSQL
+docker exec -it vulnerable-app-db psql -U dbuser -d vulnerableappdb
+
+# List tables
+docker exec -it vulnerable-app-db psql -U dbuser -d vulnerableappdb -c "\dt"
+
+# Query users
+docker exec -it vulnerable-app-db psql -U dbuser -d vulnerableappdb -c "SELECT * FROM app_user;"
+```
+
 ## Container Management
+
+### Docker Compose
+
+```bash
+# Stop services
+docker compose down
+
+# Rebuild and restart
+docker compose up -d --build
+
+# View logs
+docker compose logs app
+docker compose logs postgres
+
+# Reset database (removes all data)
+docker compose down -v
+docker compose up -d --build
+```
+
+### Single Container
 
 ```bash
 # View logs

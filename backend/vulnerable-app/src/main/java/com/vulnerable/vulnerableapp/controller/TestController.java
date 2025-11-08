@@ -1,5 +1,7 @@
 package com.vulnerable.vulnerableapp.controller;
 
+import com.vulnerable.vulnerableapp.dto.RateTestRequest;
+import com.vulnerable.vulnerableapp.dto.RateTestResponse;
 import com.vulnerable.vulnerableapp.dto.tests.TestRequest;
 import com.vulnerable.vulnerableapp.dto.tests.TestResponse;
 import com.vulnerable.vulnerableapp.dto.tests.UpdateTestRequest;
@@ -23,6 +25,9 @@ public class TestController {
     
     @PostMapping
     public ResponseEntity<TestResponse> createTest(@Valid @RequestBody TestRequest request) {
+    	System.out.println("Creating test with title: " + request.getTitle());
+    	System.out.println("Description: " + request.getDescription());
+    	System.out.println("Questions JSON: " + request.getQuestionsJson());
         return ResponseEntity.ok(testService.createTest(request));
     }
     
@@ -36,6 +41,16 @@ public class TestController {
     public ResponseEntity<List<TestResponse>> getTestsByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(testService.getTestsByUserId(userId));
     }
+    
+    @GetMapping("/mine")
+    public ResponseEntity<List<TestResponse>> getCurrentUserTests() {
+        return ResponseEntity.ok(testService.getCurrentUserTests());
+    }
+    
+    @GetMapping("/public")
+    public ResponseEntity<List<TestResponse>> getPublicTests() {
+		return ResponseEntity.ok(testService.getPublicTests());
+	}
     
     @GetMapping("/{testId}")
     public ResponseEntity<TestResponse> getTest(@PathVariable Long testId) {
@@ -52,5 +67,17 @@ public class TestController {
             @PathVariable Long testId,
             @Valid @RequestBody UpdateTestRequest request) {
         return ResponseEntity.ok(testService.updateTest(testId, request));
+    }
+    
+    @PostMapping("/{testId}/rate")
+    public ResponseEntity<TestResponse> rateTest(
+            @PathVariable Long testId,
+            @Valid @RequestBody RateTestRequest request) {
+        return ResponseEntity.ok(testService.rateTest(testId, request.getRating()));
+    }
+    
+    @DeleteMapping("/{testId}/rate")
+    public ResponseEntity<TestResponse> deleteRating(@PathVariable Long testId) {
+        return ResponseEntity.ok(testService.deleteRating(testId));
     }
 }

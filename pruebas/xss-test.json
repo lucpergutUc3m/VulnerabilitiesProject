@@ -1,0 +1,24 @@
+[
+  {
+    "question": "<img src=x onerror=alert('XSS_ATTACK')>",
+    "options": [
+      "Option A",
+      "Option B", 
+      "<img src=x onerror=alert('XSS_IN_OPTION')>",
+      "Option D"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a test explanation"
+  },
+  {
+    "question": "Normal question without XSS",
+    "options": [
+      "Normal option 1",
+      "Normal option 2",
+      "Normal option 3",
+      "Normal option 4"
+    ],
+    "correctAnswer": 0,
+    "explanation": "<img src=x onerror=alert('XSS_IN_EXPLANATION')>"
+  }
+]

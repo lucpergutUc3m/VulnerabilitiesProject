@@ -23,50 +23,66 @@ export interface Test {
     createdBy?: string;
     ownerId?: number;
     ownerEmail?: string;
+    isPublic?: boolean;
+    averageRating?: number;
+    ratingCount?: number;
+    userRating?: number;
 }
 
 export interface TestUpdatePrivacy {
     isPublic: boolean;
 }
 
+export interface RateTestResponse {
+    testId: number;
+    testTitle: string;
+    userRating: number;
+    averageRating: number;
+    totalRatings: number;
+    message: string;
+    success: boolean;
+}
+
 
 class TestService {
-    private testsData: Test[] | null = null;
-    private isLoading = false;
-
     async loadTests(): Promise<Test[]> {
-        if (this.testsData) {
-            return this.testsData;
+        return this.getMyTests();
+    }
+
+    async getMyTests(): Promise<Test[]> {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            throw new Error('No authentication token found. Please login first.');
         }
 
-        if (this.isLoading) {
-            while (this.isLoading) {
-                await new Promise(resolve => setTimeout(resolve, 100));
+        const response = await fetch(`${config.api.baseUrl}/tests/mine`, {
+            method: 'GET',
+            headers: { 
+                'Authorization': `Bearer ${token}`
             }
-            return (this.testsData as Test[] | null) ?? [];
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json() as Test[];
+    }
+
+    async getPublicTests(): Promise<Test[]> {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            throw new Error('No authentication token found. Please login first.');
         }
 
-        this.isLoading = true;
-        try {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                throw new Error('No authentication token found. Please login first.');
+        const response = await fetch(`${config.api.baseUrl}/tests/public`, {
+            method: 'GET',
+            headers: { 
+                'Authorization': `Bearer ${token}`
             }
-
-            const response = await fetch(`${config.api.baseUrl}/tests`, {
-                method: 'GET',
-                headers: { 
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            this.testsData = await response.json() as Test[];
-            return this.testsData;
-        } finally {
-            this.isLoading = false;
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+        return await response.json() as Test[];
     }
 
     async getTestById(testId: number): Promise<Test | undefined> {
@@ -98,10 +114,6 @@ class TestService {
     async getQuestionByTestAndId(testId: number, questionId: number): Promise<Question | undefined> {
         const test = await this.getTestById(testId);
         return test?.questions.find(q => q.id === questionId);
-    }
-
-    clearCache(): void {
-        this.testsData = null;
     }
 
     async createTest(testData: Omit<Test, 'id'>): Promise<Test> {
@@ -146,8 +158,6 @@ class TestService {
 
         const createdTest = await response.json();
         
-        this.clearCache();
-        
         return createdTest;
     }
 
@@ -183,6 +193,50 @@ class TestService {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+    }
+
+    async rateTest(testId: number, rating: number): Promise<Test> {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            throw new Error('No authentication token found. Please login first.');
+        }
+
+        const response = await fetch(`${config.api.baseUrl}/tests/${testId}/rate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ rating })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: 'Failed to submit rating' }));
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
+
+        return response.json() as Promise<Test>;
+    }
+
+    async deleteRating(testId: number): Promise<Test> {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            throw new Error('No authentication token found. Please login first.');
+        }
+
+        const response = await fetch(`${config.api.baseUrl}/tests/${testId}/rate`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: 'Failed to delete rating' }));
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
+
+        return response.json() as Promise<Test>;
     }
 
 }

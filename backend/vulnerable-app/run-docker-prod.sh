@@ -79,8 +79,8 @@ echo ""
 # Change to project root
 cd "$SCRIPT_DIR"
 
-# Set the profiles - docker-dev for PostgreSQL, seeder for automatic data initialization
-export SPRING_PROFILES_ACTIVE=docker-dev,seeder
+# Set the profiles - docker for PostgreSQL, seeder for automatic data initialization
+export SPRING_PROFILES_ACTIVE=prod,seeder
 
 echo "Starting Maven Spring Boot application..."
 echo "SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE"

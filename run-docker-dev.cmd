@@ -20,8 +20,8 @@ if errorlevel 1 (
 )
 
 echo [1/3] Starting PostgreSQL and Adminer...
-REM Navigate to devdoc folder where compose.yaml is located
-pushd %~dp0
+REM Navigate to backend devdoc folder where compose.yaml is located
+pushd "%~dp0\backend\vulnerable-app\devdoc"
 docker compose --profile dev up -d
 popd
 if errorlevel 1 (
@@ -48,8 +48,8 @@ echo Backend: http://localhost:8080
 echo ========================================
 echo.
 
-REM Change to project root directory
-cd /d "%~dp0\.."
+REM Change to backend project directory
+cd /d "%~dp0\backend\vulnerable-app"
 
 REM Start the application with docker-dev and seeder profiles
 call mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=docker-dev,seeder

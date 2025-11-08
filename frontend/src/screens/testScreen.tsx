@@ -4,7 +4,6 @@ import styles from '../css/testScreen.module.css';
 import { IoMdArrowBack } from "react-icons/io";
 import { MdNavigateBefore, MdNavigateNext } from "react-icons/md";
 import { useTestById } from '../hooks/useTests';
-import SafeText from '../components/SafeText';
 
 interface UserAnswers {
     [questionId: number]: number | null;
@@ -135,9 +134,7 @@ const TestScreen = () => {
                 {/* Pregunta Actual */}
                 <div className={styles.questionSection}>
                     <div className={styles.questionContainer}>
-                        <h3 className={styles.questionText}>
-                            <SafeText text={currentQuestion.question} />
-                        </h3>
+                        <h3 className={styles.questionText} dangerouslySetInnerHTML={{ __html: currentQuestion.question }} />
 
                         {/* Opciones de respuesta */}
                         <div className={styles.optionsContainer}>
@@ -166,12 +163,10 @@ const TestScreen = () => {
                                         onClick={() => handleAnswerClick(index)}
                                         disabled={isAnswered}
                                     >
-                                        <span className={styles.optionLabel}>
+                                        <span className={styles.optionLetter}>
                                             {String.fromCharCode(65 + index)}
                                         </span>
-                                        <span className={styles.optionText}>
-                                            <SafeText text={option} />
-                                        </span>
+                                        <span className={styles.optionText} dangerouslySetInnerHTML={{ __html: option }} />
                                     </button>
                                 );
                             })}
@@ -181,9 +176,7 @@ const TestScreen = () => {
                         {isAnswered && currentQuestion.explanation && (
                             <div className={styles.explanationBox}>
                                 <h4>Explanation:</h4>
-                                <p>
-                                    <SafeText text={currentQuestion.explanation} />
-                                </p>
+                                <div dangerouslySetInnerHTML={{ __html: currentQuestion.explanation }} />
                             </div>
                         )}
                     </div>

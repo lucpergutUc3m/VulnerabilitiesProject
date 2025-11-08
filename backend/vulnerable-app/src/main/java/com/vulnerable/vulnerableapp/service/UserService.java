@@ -6,6 +6,7 @@ import com.vulnerable.vulnerableapp.dto.admin.AdminUpdateUserRequest;
 import com.vulnerable.vulnerableapp.entity.AppUser;
 import com.vulnerable.vulnerableapp.mapper.UserMapper;
 import com.vulnerable.vulnerableapp.repository.AppUserRepository;
+import com.vulnerable.vulnerableapp.util.XssUtils;
 import com.vulnerable.vulnerableapp.utils.UserRoles;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -55,7 +56,8 @@ public class UserService {
         System.out.println("Updating user: " + user);
         
         if (request.getName() != null && !request.getName().isBlank()) {
-            user.setName(request.getName());
+            // Sanitize name to prevent XSS
+            user.setName(XssUtils.sanitizeWithLimit(request.getName(), 100));
         }
         
         if (request.getOldPassword() != null && request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
@@ -76,7 +78,8 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
         if (request.getName() != null && !request.getName().isBlank()) {
-            user.setName(request.getName());
+            // Sanitize name to prevent XSS
+            user.setName(XssUtils.sanitizeWithLimit(request.getName(), 100));
         }
         
         if (request.getPassword() != null && !request.getPassword().isBlank()) {

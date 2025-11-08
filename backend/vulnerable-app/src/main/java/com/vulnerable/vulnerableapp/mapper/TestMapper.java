@@ -8,6 +8,7 @@ import com.vulnerable.vulnerableapp.dto.tests.TestResponse;
 import com.vulnerable.vulnerableapp.entity.AppUser;
 import com.vulnerable.vulnerableapp.entity.TestEntity;
 import com.vulnerable.vulnerableapp.repository.AppUserRepository;
+import com.vulnerable.vulnerableapp.repository.TestRatingRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -56,6 +57,9 @@ public abstract class TestMapper {
                 .orElse("Unknown");
     }
     
+    @Autowired
+    protected TestRatingRepository testRatingRepository;
+    
     /**
      * Convert TestEntity to TestResponse DTO
      * @param test The test entity
@@ -64,7 +68,72 @@ public abstract class TestMapper {
     @Mapping(target = "timeLimit", source = "timeLimitMinutes")
     @Mapping(target = "createdBy", source = "ownerId", qualifiedByName = "ownerIdToName")
     @Mapping(target = "questions", source = "questionsJson", qualifiedByName = "jsonToQuestions")
+    @Mapping(target = "averageRating", source = "test", qualifiedByName = "calculateAverageRating")
+    @Mapping(target = "ratingCount", source = "test", qualifiedByName = "calculateRatingCount")
+    @Mapping(target = "userRating", source = "test", qualifiedByName = "getUserRating")
     public abstract TestResponse toTestResponse(TestEntity test);
+    
+    /**
+     * Calculate average rating for a test
+     */
+    @Named("calculateAverageRating")
+    protected Double calculateAverageRating(TestEntity test) {
+        List<com.vulnerable.vulnerableapp.entity.TestRating> ratings = testRatingRepository.findByTestId(test.getId());
+        if (ratings.isEmpty()) {
+            return 0.0;
+        }
+        double sum = ratings.stream().mapToInt(com.vulnerable.vulnerableapp.entity.TestRating::getRating).sum();
+        return sum / ratings.size();
+    }
+    
+    /**
+     * Calculate rating count for a test
+     */
+    @Named("calculateRatingCount")
+    protected Integer calculateRatingCount(TestEntity test) {
+        return (int) testRatingRepository.countByTestId(test.getId());
+    }
+    
+    /**
+     * Get current user's rating for a test
+     * Handles TOCTOU vulnerability by getting the most recent rating if multiple exist
+     * Returns null if user hasn't rated the test
+     */
+    @Named("getUserRating")
+    protected Integer getUserRating(TestEntity test) {
+        try {
+            // Get current authenticated user
+            org.springframework.security.core.Authentication authentication = 
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return null;
+            }
+            
+            AppUser currentUser = (AppUser) authentication.getPrincipal();
+            Long userId = currentUser.getId();
+            
+            // Get all ratings by this user for this test (could be multiple due to TOCTOU)
+            List<com.vulnerable.vulnerableapp.entity.TestRating> userRatings = 
+                testRatingRepository.findByTestId(test.getId()).stream()
+                    .filter(rating -> rating.getUserId().equals(userId))
+                    .toList();
+            
+            if (userRatings.isEmpty()) {
+                return null;
+            }
+            
+            // If TOCTOU created multiple ratings, return the most recent one
+            return userRatings.stream()
+                .max(java.util.Comparator.comparing(com.vulnerable.vulnerableapp.entity.TestRating::getCreatedAt))
+                .map(com.vulnerable.vulnerableapp.entity.TestRating::getRating)
+                .orElse(null);
+                
+        } catch (Exception e) {
+            // If we can't get the user (e.g., anonymous access), return null
+            return null;
+        }
+    }
     
     /**
      * Parse questionsJson string to List of QuestionResponse

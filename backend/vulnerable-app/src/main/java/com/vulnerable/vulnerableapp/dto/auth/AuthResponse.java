@@ -17,6 +17,4 @@ public class AuthResponse {
     private UserResponse user;
     private String token;
     private Long expiresIn;
-    private String refreshToken;
-    private Long refreshExpiresIn;
 }

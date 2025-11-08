@@ -50,18 +50,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 username = jwtUtil.extractUsername(jwt);
             } catch (Exception e) {
-                // Invalid token
+                SecurityContextHolder.clearContext();
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\":\"Invalid JWT token\"}");
+                return;
             }
         }
         
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-            
-            if (jwtUtil.validateToken(jwt, userDetails)) {
-                // Extract authorities from JWT claims, with fallback to UserDetails
-                Collection<? extends GrantedAuthority> authorities = extractAuthoritiesFromToken(jwt);
+            try {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
                 
-                // If JWT authorities are empty, use UserDetails authorities
+                if (!jwtUtil.validateToken(jwt, userDetails)) {
+                    SecurityContextHolder.clearContext();
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Invalid JWT token\"}");
+                    return;
+                }
+                
+                Collection<? extends GrantedAuthority> authorities = extractAuthoritiesFromToken(jwt);
                 if (authorities.isEmpty()) {
                     authorities = userDetails.getAuthorities();
                 }
@@ -70,12 +79,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
+                SecurityContextHolder.clearContext();
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\":\"" + e.getMessage() + "\"}");
+                return;
+            } catch (Exception e) {
+                SecurityContextHolder.clearContext();
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\":\"Authentication failed\"}");
+                return;
             }
         }
         chain.doFilter(request, response);
     }
     
-    private Collection<? extends GrantedAuthority> extractAuthoritiesFromToken(String token) {
+    private Collection<? extends GrantedAuthority> extractAuthoritiesFromToken(String token) throws ServletException {
         try {
             Claims claims = jwtUtil.extractAllClaims(token);
             
@@ -86,14 +107,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Collection<? extends GrantedAuthority> authorities = authoritiesList.stream()
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
-                System.err.println("✅ JwtAuthenticationFilter: Extracted authorities from JWT: " + authoritiesList);
                 return authorities;
-            } else {
-                System.err.println("⚠️ JwtAuthenticationFilter: No authorities found in JWT claims");
             }
         } catch (Exception e) {
-            System.err.println("❌ JwtAuthenticationFilter: Error extracting authorities from JWT: " + e.getMessage());
-            e.printStackTrace();
+            throw new ServletException("Error extracting authorities from JWT", e);
         }
         return List.of();
     }

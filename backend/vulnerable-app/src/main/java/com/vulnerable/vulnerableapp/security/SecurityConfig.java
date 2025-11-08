@@ -37,12 +37,18 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Spring-managed singleton bean injected via constructor")
     private final CustomUserDetailsService userDetailsService;
+    @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Spring-managed singleton bean injected via constructor")
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint))
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints - API
                 .requestMatchers("/api/auth/**").permitAll()
