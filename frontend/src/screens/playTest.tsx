@@ -23,7 +23,6 @@ const TestStartPage = () => {
     const showQuestions = state?.showQuestions || false;
     const stateQuestions = state?.questions || [];
 
-    const [hoveredRating, setHoveredRating] = useState<number>(0);
     const [ratingMessage, setRatingMessage] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [localRatingData, setLocalRatingData] = useState<{ 
@@ -124,6 +123,7 @@ const TestStartPage = () => {
 
     const questionsToShow = showQuestions && stateQuestions.length > 0 ? stateQuestions : null;
 
+    console.log(questionsToShow);
     return (
         <div className={styles.container}>
             <div className={styles.backButtonContainer}>
@@ -158,13 +158,11 @@ const TestStartPage = () => {
                                     {[1, 2, 3, 4, 5].map((star) => (
                                         <button
                                             key={star}
-                                            className={styles.starButton}
-                                            onMouseEnter={() => setHoveredRating(star)}
-                                            onMouseLeave={() => setHoveredRating(0)}
+                                            className={`${styles.starButton} ${(userRating && userRating >= star) ? styles.starActive : ''}`}
                                             onClick={() => handleRatingClick(star)}
                                             disabled={isSubmitting}
                                         >
-                                            {(hoveredRating >= star || (userRating && userRating >= star)) ? (
+                                            {(userRating && userRating >= star) ? (
                                                 <FaStar className={styles.starFilled} />
                                             ) : (
                                                 <FaRegStar className={styles.starEmpty} />
@@ -207,6 +205,7 @@ const TestStartPage = () => {
                     </div>
                 </div>
 
+                
                 {questionsToShow && (
                     <div className={styles.questionsPreviewSection}>
                         <h3 className={styles.questionsPreviewTitle}>
@@ -214,12 +213,14 @@ const TestStartPage = () => {
                         </h3>
                         <div className={styles.questionsPreviewContainer}>
                             {questionsToShow.map((question, index) => (
+                                console.log(question.question),
                                 <div key={question.id} className={styles.questionPreview}>
                                     <div className={styles.questionPreviewHeader}>
                                         <span className={styles.questionPreviewNumber}>
                                             Question {index + 1}
                                         </span>
                                     </div>
+                                    
                                     <p className={styles.questionPreviewText} dangerouslySetInnerHTML={{ __html: question.question }} />
                                     <div className={styles.optionsPreview}>
                                         {question.options.map((option, optIndex) => (

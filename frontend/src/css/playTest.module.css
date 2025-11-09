@@ -236,6 +236,20 @@
     cursor: not-allowed;
 }
 
+/* Hover effect: when hovering a star, highlight it and all previous stars */
+.starsContainer:hover .starButton:not(.starActive) .starEmpty {
+    color: #94a3b8;
+}
+
+.starsContainer .starButton:hover ~ .starButton .starEmpty {
+    color: #cbd5e1;
+}
+
+.starsContainer .starButton:hover .starEmpty {
+    color: #fbbf24;
+    filter: drop-shadow(0 2px 4px rgba(251, 191, 36, 0.2));
+}
+
 .starFilled {
     color: #fbbf24;
     filter: drop-shadow(0 2px 4px rgba(251, 191, 36, 0.4));
@@ -243,6 +257,7 @@
 
 .starEmpty {
     color: #cbd5e1;
+    transition: color 0.15s ease;
 }
 
 .clearRatingButton {

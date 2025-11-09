@@ -176,7 +176,7 @@ const TestScreen = () => {
                         {isAnswered && currentQuestion.explanation && (
                             <div className={styles.explanationBox}>
                                 <h4>Explanation:</h4>
-                                <div dangerouslySetInnerHTML={{ __html: currentQuestion.explanation }} />
+                                <p dangerouslySetInnerHTML={{ __html: currentQuestion.explanation }} />
                             </div>
                         )}
                     </div>
